@@ -81,7 +81,7 @@ export function FAQSection() {
           fontWeight: 700, lineHeight: 1.05, letterSpacing: '-0.03em',
           color: 'var(--noir)', margin: 0,
         }}>
-          Tout ce que vous<br />voulez savoir.
+          Tout ce que vous<br />voulez savoir
         </h2>
       </div>
 

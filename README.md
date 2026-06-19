@@ -35,4 +35,6 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Fonctionnalités a ajouté
+
 - Il reste le formulaire de contact à rendre fonctionnel, claude avait utiliser une méthode où c’était payant seulement jusqu’à un certain seuil de messages par mois

@@ -12,7 +12,6 @@ if (typeof window !== "undefined") {
 
 const navLinks = [
   { label: "Services", href: "#prestations", shape: "1" },
-  { label: "Galerie", href: "#galerie", shape: "2" },
   { label: "Avis", href: "#avis", shape: "3" },
   { label: "Contact", href: "#contact", shape: "4" },
 ];

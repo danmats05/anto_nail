@@ -271,7 +271,7 @@ export function ContactSection() {
           >
             Réservez
             <br />
-            votre séance.
+            votre séance
           </h2>
 
           <p

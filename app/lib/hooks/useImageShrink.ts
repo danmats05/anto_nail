@@ -24,6 +24,8 @@ interface ImageShrinkOptions {
   thumbTop?: number
   /** GSAP scrub value — higher = more lag/smoothing (default: 1) */
   scrub?: number
+  /** GSAP ScrollTrigger end value — limits the animation to a portion of the outer div (default: 'bottom bottom') */
+  triggerEnd?: string
 }
 
 /**
@@ -53,6 +55,7 @@ export function useImageShrink({
   thumbH = 148,
   thumbTop = 40,
   scrub = 1,
+  triggerEnd = 'bottom bottom',
 }: ImageShrinkOptions) {
   useEffect(() => {
     if (window.innerWidth < 1024) return
@@ -81,7 +84,7 @@ export function useImageShrink({
         scrollTrigger: {
           trigger: outerRef.current,
           start: 'top top',
-          end: 'bottom bottom',
+          end: triggerEnd,
           scrub,
         },
       })
@@ -120,5 +123,5 @@ export function useImageShrink({
     })
 
     return () => ctx.revert()
-  }, [outerRef, imageContainerRef, overlayRef, whiteBgRef, contentRef, thumbW, thumbH, thumbTop, scrub])
+  }, [outerRef, imageContainerRef, overlayRef, whiteBgRef, contentRef, thumbW, thumbH, thumbTop, scrub, triggerEnd])
 }

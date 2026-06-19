@@ -164,7 +164,7 @@ export function TestimonialsSection() {
           fontWeight: 700, lineHeight: 1.05, letterSpacing: '-0.03em',
           color: 'var(--noir)', margin: '0 0 12px',
         }}>
-          Elles parlent<br />mieux que moi.
+          Elles parlent<br />mieux que moi
         </h2>
         <p style={{
           fontFamily: 'var(--font-dm-sans)', fontSize: '14px',

@@ -191,7 +191,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
             }}
           >
             <FlipText text="Sublimez" />
-            <FlipText text="vos mains." />
+            <FlipText text="vos mains" />
           </h1>
         </div>
 

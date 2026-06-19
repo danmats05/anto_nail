@@ -4,6 +4,57 @@
 
 ---
 
+## Ordre des sections dans `app/page.tsx` — CRITIQUE
+
+```jsx
+<Hero />
+<ServicesIntro />
+<TestimonialsSection />   ← DOIT être juste après ServicesIntro
+<GallerySection />        ← APRÈS TestimonialsSection, jamais entre les deux
+<FAQSection />
+<ContactSection />
+<Footer />
+```
+
+**NE PAS** insérer GallerySection entre ServicesIntro et TestimonialsSection.
+Le `marginTop: '-100vh'` de TestimonialsSection est calibré pour glisser par-dessus ServicesIntro.
+Si on insère un élément entre les deux, ServicesIntro sort de sticky avant que testimonials arrive → heading "Parce que vos mains" défile. CASSÉ.
+
+---
+
+## `app/layout.tsx` — CRITIQUE
+
+```jsx
+// PAS de h-full sur <html> — provoque un mauvais calcul de scroll height par Lenis sur mobile
+<html lang="fr" className={`${cormorant.variable} ${dmSans.variable}`}>
+<body className="min-h-full flex flex-col antialiased">
+```
+
+`h-full` sur `<html>` = `height: 100%` = Lenis pense que la page fait 100vh → scroll bloqué sur mobile.
+
+---
+
+## `app/providers/LenisProvider.tsx` — Scroll fluide global
+
+Handler global qui intercepte tous les `<a href="#...">` et scrolle via Lenis :
+
+```ts
+const handleAnchorClick = (e: MouseEvent) => {
+  const anchor = (e.target as HTMLElement).closest('a[href^="#"]') as HTMLAnchorElement | null
+  if (!anchor) return
+  const href = anchor.getAttribute('href')
+  if (!href || href === '#') return
+  e.preventDefault()
+  lenis.scrollTo(href, { duration: 1.2 })
+}
+document.addEventListener('click', handleAnchorClick)
+```
+
+Couvre : liens footer, boutons Hero CTA, boutons Réserver, liens Galerie, etc.
+Les liens du menu Navbar appellent `close()` en plus via leur `onClick` — les deux coexistent.
+
+---
+
 ## ServicesIntro (`app/components/ServicesIntro.tsx`)
 
 ### Constantes wheel (NE PAS MODIFIER sans raison)
@@ -143,7 +194,7 @@ tl.to(imageContainerRef.current, {
 
 ## TestimonialsSection (`app/components/TestimonialsSection.tsx`)
 
-### marginTop — CRITIQUE, NE PAS METTRE À 0
+### marginTop — CRITIQUE, NE PAS METTRE À 0 (desktop)
 ```jsx
 // Sur la section #avis :
 marginTop: '-100vh'
@@ -152,12 +203,32 @@ zIndex: 20
 `-100vh` = testimonials glisse PAR-DESSUS la section services sticky AVANT qu'elle se déstickifie.
 Si mis à 0 → la section services défile et le heading "Parce que vos mains" se déplace. CASSÉ.
 
+```css
+/* Mobile uniquement — reset marginTop */
+@media (max-width: 1023px) {
+  .testimonials-section { margin-top: 0 !important; }
+}
+```
+
 ### Hiérarchie stacking root (explication du slide-over)
 ```
 Services sticky (position:sticky, pas de zIndex) = root z: auto
 Testimonials    (position:relative, zIndex:20)    = root z: 20   ← AU-DESSUS
 ```
 → Les testimonials glissent visuellement par-dessus les services.
+
+### Scroll horizontal — touch-action (IMPORTANT mobile)
+```jsx
+// wrapperRef : le conteneur de cards
+style={{
+  overflowX: 'scroll',
+  overflowY: 'hidden',
+  WebkitOverflowScrolling: 'touch',
+  touchAction: 'pan-x',   // ← NE PAS SUPPRIMER
+}}
+```
+`touchAction: 'pan-x'` empêche le conteneur de capturer les swipes verticaux sur mobile.
+Sans ça : le scroll de page se bloque quand le doigt passe sur ce conteneur.
 
 ### Galerie déroulante
 ```js
@@ -174,11 +245,68 @@ else             gsap.to(el,              { height: 0,      duration: 0.5,  ease
 '/D%C3%A9pose%20et%20soin.jpeg', '/Manicure.jpeg'
 ```
 
-### Bouton "Voir la galerie"
-```jsx
-// Utilise btnPrimary (lavande + texte blanc)
-import { btnPrimary } from '../lib/hooks'
-style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+### Boutons — animation hover (identique à tous les boutons du site)
+```css
+.gallery-cta { transition: background 0.25s ease, transform 0.2s ease !important; }
+.gallery-cta:hover { background: var(--lavender-dark) !important; transform: translateY(-2px); }
+```
+
+---
+
+## GallerySection (`app/components/GallerySection.tsx`)
+
+- id : `#galerie` (cible du lien Galerie dans le menu)
+- Cachée sur mobile / tablette :
+```css
+@media (max-width: 1023px) { #galerie { display: none !important; } }
+```
+- Contient actuellement des dégradés placeholder → à remplacer par de vraies photos
+
+---
+
+## Navbar (`app/components/Navbar.tsx`)
+
+### FlipText sur les liens du menu
+Les 4 liens (Services, Galerie, Avis, Contact) utilisent le composant `FlipText` local.
+Animation déclenchée par `.menu-nav-link:hover` (pas `.flip-word:hover`) pour couvrir toute la zone cliquable.
+
+```css
+.flip-front span, .flip-back span { transition: transform 0.3s ease-in-out; }
+.flip-front span { transform: translateY(0); }
+.flip-back span { transform: translateY(110%); }
+.menu-nav-link:hover .flip-front span { transform: translateY(-110%); }
+.menu-nav-link:hover .flip-back span { transform: translateY(0); }
+```
+
+### Boutons — animation hover
+```css
+/* Bouton menu (croix) */
+.nav-toggle-btn { transition: background 0.25s ease, transform 0.2s ease !important; }
+.nav-toggle-btn:hover { background: var(--lavender-dark) !important; transform: translateY(-2px); }
+
+/* Bouton Réserver dans le menu */
+.nav-reserve-btn { transition: background 0.25s ease, transform 0.2s ease !important; }
+.nav-reserve-btn:hover { background: var(--lavender-dark) !important; transform: translateY(-2px); }
+```
+
+---
+
+## Hero (`app/components/Hero.tsx`)
+
+### FlipText — animation lettre par lettre
+```css
+.flip-front span, .flip-back span { transition: transform 0.3s ease-in-out; }
+.flip-front span { transform: translateY(0); }
+.flip-word:hover .flip-front span { transform: translateY(-110%); }
+.flip-back span { transform: translateY(110%); }
+.flip-word:hover .flip-back span { transform: translateY(0); }
+```
+Délai entre lettres : `transitionDelay: ${i * 22}ms`
+
+### Bouton CTA
+```css
+.hero-btn-cta { transition: background 0.25s ease, transform 0.2s ease !important; }
+.hero-btn-cta:hover { background: var(--lavender-dark) !important; transform: translateY(-2px); }
 ```
 
 ---

@@ -5,7 +5,6 @@ import { Preloader } from './components/Preloader'
 import { Navbar } from './components/Navbar'
 import { Hero } from './components/Hero'
 import { ServicesIntro } from './components/ServicesIntro'
-import { GallerySection } from './components/GallerySection'
 import { TestimonialsSection } from './components/TestimonialsSection'
 import { FAQSection } from './components/FAQSection'
 import { ContactSection } from './components/ContactSection'
@@ -21,9 +20,8 @@ export default function Home() {
       <main style={{ width: '100%' }}>
         <Hero ready={ready} />
         <ServicesIntro />
-        <GallerySection />
         <TestimonialsSection />
-        <FAQSection />
+<FAQSection />
         <ContactSection />
       </main>
       <Footer />

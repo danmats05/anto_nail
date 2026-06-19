@@ -72,7 +72,7 @@ function MobileSwipeServices() {
           fontWeight: 700, lineHeight: 1.05, letterSpacing: '-0.035em',
           color: 'var(--noir)', margin: 0,
         }}>
-          Parce que vos mains<br />méritent le meilleur.
+          Parce que vos mains<br />méritent le meilleur
         </h2>
       </div>
 
@@ -162,10 +162,12 @@ export function ServicesIntro() {
   const whiteBgRef        = useRef<HTMLDivElement>(null)
   const contentRef        = useRef<HTMLDivElement>(null)
   const wheelRef          = useRef<HTMLDivElement>(null)
+  const wheelAreaRef      = useRef<HTMLDivElement>(null)
+  const captionRef        = useRef<HTMLDivElement>(null)
   const darkOverlayRef    = useRef<HTMLDivElement>(null)
   const [activeIdx, setActiveIdx] = useState(0)
 
-  useImageShrink({ outerRef, imageContainerRef, overlayRef, whiteBgRef, contentRef })
+  useImageShrink({ outerRef, imageContainerRef, overlayRef, whiteBgRef, contentRef, triggerEnd: '38% top' })
 
   useEffect(() => {
     const outer = outerRef.current
@@ -219,21 +221,42 @@ export function ServicesIntro() {
 
     const ctx = gsap.context(() => {
       applyState(0)
+
+      // Wheel + caption appear automatically once the title is fully visible (~38% of outer div)
+      // 45% gives a safe margin for scrub=1 settling time before the wheel pops in
       ScrollTrigger.create({
         trigger: outer,
-        start: '60% top',
-        end: '80% top',
-        scrub: 1,
+        start: '45% top',
+        once: true,
+        onEnter: () => {
+          gsap.to([wheelAreaRef.current, captionRef.current], {
+            opacity: 1,
+            duration: 0.55,
+            ease: 'power2.out',
+          })
+        },
+      })
+
+      // Rotation: scrub:true = direct 1:1 mapping, no lag.
+      // 46% → 72% of 800vh = 368→576vh = 208vh for 6 cards (≈34vh/card)
+      // #avis (marginTop:-100vh) enters viewport at 800-200=600vh = 75% → 24vh buffer after rotation ✓
+      ScrollTrigger.create({
+        trigger: outer,
+        start: '46% top',
+        end: '72% top',
+        scrub: true,
         onUpdate: (self) => applyState(self.progress),
       })
 
+      // Dark overlay fades in when rotation ends (72%) and completes when #avis reaches viewport top
       gsap.set(darkOverlayRef.current, { opacity: 0 })
       gsap.to(darkOverlayRef.current, {
         opacity: 0.72,
         ease: 'none',
         scrollTrigger: {
-          trigger: '#avis',
-          start: 'top bottom',
+          trigger: outer,
+          start: '72% top',
+          endTrigger: '#avis',
           end: 'top top',
           scrub: 1.5,
         },
@@ -313,7 +336,7 @@ export function ServicesIntro() {
               textTransform: 'uppercase', color: 'var(--white)', margin: 0, textAlign: 'center',
               maxWidth: 'calc(100vw - 40px)',
             }}>
-              L&apos;art<br />de vos mains.
+              L&apos;art<br />de vos mains
             </h2>
           </div>
 
@@ -335,11 +358,11 @@ export function ServicesIntro() {
               position: 'relative', zIndex: 200,
               maxWidth: 'calc(100vw - 40px)',
             }}>
-              Parce que vos mains<br />méritent le meilleur.
+              Parce que vos mains<br />méritent le meilleur
             </h2>
 
             {/* Wheel area */}
-            <div style={{ position: 'relative', width: '100%', flex: 1, marginTop: '24px' }}>
+            <div ref={wheelAreaRef} style={{ position: 'relative', width: '100%', flex: 1, marginTop: '24px', opacity: 0 }}>
               <div
                 ref={wheelRef}
                 style={{
@@ -373,9 +396,9 @@ export function ServicesIntro() {
             </div>
 
             {/* Active service caption */}
-            <div style={{
+            <div ref={captionRef} style={{
               position: 'absolute', bottom: '5vh', left: 0, right: 0,
-              textAlign: 'center', pointerEvents: 'none', zIndex: 10,
+              textAlign: 'center', pointerEvents: 'none', zIndex: 10, opacity: 0,
             }}>
               <p style={{
                 fontFamily: 'var(--font-dm-sans)', fontSize: '11px', fontWeight: 700,
