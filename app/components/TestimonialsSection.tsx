@@ -95,10 +95,20 @@ export function TestimonialsSection() {
       gsap.fromTo(el, { height: 0 }, { height: 'auto', duration: 0.65, ease: 'power2.inOut' })
     } else {
       const h = inner.offsetHeight
-      gsap.timeline()
+      gsap.timeline({
+        onComplete: () => {
+          gsap.set(inner, { y: 0 })
+          if (galleryCTARef.current) {
+            lenis?.scrollTo(galleryCTARef.current, {
+              duration: 1.0,
+              offset: -120,
+              easing: (t: number) => 1 - Math.pow(1 - t, 4),
+            })
+          }
+        }
+      })
         .to(inner, { y: -h, duration: 0.5, ease: 'power2.inOut' }, 0)
         .to(el,    { height: 0, duration: 0.5, ease: 'power2.inOut' }, 0)
-        .set(inner, { y: 0 })
     }
   }, [galleryOpen])
 
