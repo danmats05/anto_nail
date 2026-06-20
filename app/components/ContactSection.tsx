@@ -285,7 +285,7 @@ export function ContactSection() {
               maxWidth: "340px",
             }}
           >
-            Remplissez le formulaire et je vous recontacte sous 24h sur WhatsApp
+            Remplissez le formulaire et je vous recontacte sur WhatsApp
             pour confirmer votre créneau.
           </p>
 
@@ -355,7 +355,7 @@ export function ContactSection() {
                   margin: 0,
                 }}
               >
-                Je vous recontacte sous 24h sur WhatsApp pour confirmer votre
+                Je vous recontacte sur WhatsApp pour confirmer votre
                 rendez-vous.
               </p>
               <button

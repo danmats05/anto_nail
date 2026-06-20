@@ -107,6 +107,31 @@ export function TestimonialsSection() {
     const wrapper = wrapperRef.current
     if (!wrapper) return
 
+    // Mobile: intercept touch direction — horizontal → carrousel, vertical → Lenis
+    let startX = 0
+    let startY = 0
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      const dx = Math.abs(e.touches[0].clientX - startX)
+      const dy = Math.abs(e.touches[0].clientY - startY)
+      if (dx > dy && dx > 5) e.stopPropagation()
+    }
+
+    wrapper.addEventListener('touchstart', onTouchStart, { passive: true })
+    wrapper.addEventListener('touchmove', onTouchMove, { passive: true })
+
+    if (window.innerWidth < 1024) {
+      return () => {
+        wrapper.removeEventListener('touchstart', onTouchStart)
+        wrapper.removeEventListener('touchmove', onTouchMove)
+      }
+    }
+
     const MAX_SPEED = 18
     const DEAD_ZONE = 0.04
 
@@ -139,6 +164,8 @@ export function TestimonialsSection() {
     raf = requestAnimationFrame(tick)
 
     return () => {
+      wrapper.removeEventListener('touchstart', onTouchStart)
+      wrapper.removeEventListener('touchmove', onTouchMove)
       wrapper.removeEventListener('mouseenter', () => { active = true })
       wrapper.removeEventListener('mouseleave', () => { active = false })
       wrapper.removeEventListener('mousemove', onMove)
@@ -184,13 +211,13 @@ export function TestimonialsSection() {
       <div style={{ position: 'relative' }}>
         {/* Edge fadeleft */}
         <div style={{
-          position: 'absolute', left: 0, top: 0, bottom: 0, width: '160px', zIndex: 2,
+          position: 'absolute', left: 0, top: 0, bottom: 0, width: '80px', zIndex: 2,
           background: 'linear-gradient(to right, var(--cream) 0%, transparent 100%)',
           pointerEvents: 'none',
         }} />
         {/* Edge faderight */}
         <div style={{
-          position: 'absolute', right: 0, top: 0, bottom: 0, width: '160px', zIndex: 2,
+          position: 'absolute', right: 0, top: 0, bottom: 0, width: '80px', zIndex: 2,
           background: 'linear-gradient(to left, var(--cream) 0%, transparent 100%)',
           pointerEvents: 'none',
         }} />
@@ -198,7 +225,6 @@ export function TestimonialsSection() {
         {/* Scrollable wrapper */}
         <div
           ref={wrapperRef}
-          data-lenis-prevent
           style={{
             overflowX: 'scroll',
             overflowY: 'hidden',
@@ -311,6 +337,21 @@ export function TestimonialsSection() {
               />
             </div>
           ))}
+        </div>
+        <div style={{
+          textAlign: 'center', padding: '40px 0 8px',
+          opacity: galleryOpen ? 1 : 0,
+          transition: 'opacity 0.4s ease',
+          pointerEvents: galleryOpen ? 'auto' : 'none',
+        }}>
+          <button
+            onClick={() => setGalleryOpen(false)}
+            style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+            className="gallery-cta"
+          >
+            Fermer la galerie
+            <span style={{ fontSize: '14px' }}>↑</span>
+          </button>
         </div>
       </div>
 

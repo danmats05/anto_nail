@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger)
 const FAQS = [
   {
     q: 'Comment prendre rendez-vous ?',
-    a: "Via Instagram @antonail ou par téléphone. Les disponibilités s'affichent en temps réel. Je réponds sous 24h.",
+    a: "Les réservations se font obligatoirement via le formulaire de contact sur le site. Une fois votre demande soumise, je vous recontacte pour confirmer votre créneau.",
   },
   {
     q: 'Combien de temps dure une séance ?',
@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Vous déplacez-vous à domicile ?',
-    a: "Non, les séances se déroulent exclusivement dans mon studio à Abidjan. L'adresse exacte vous est communiquée lors de la confirmation de rendez-vous.",
+    a: "Oui, je me déplace à domicile, mais les frais de déplacement sont à la charge de la cliente. Mon studio est basé à Dakar, au quartier des Mamelles. L'adresse exacte vous est communiquée lors de la confirmation de rendez-vous.",
   },
   {
     q: 'Quels produits utilisez-vous ?',
