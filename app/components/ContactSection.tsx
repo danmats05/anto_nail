@@ -171,6 +171,7 @@ export function ContactSection() {
   const [accepted, setAccepted] = useState(false);
   const [checkError, setCheckError] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -576,6 +577,111 @@ export function ContactSection() {
                 />
               </div>
 
+              {/* Import image inspiration */}
+              <div>
+                <p style={{
+                  fontFamily: 'var(--font-dm-sans)',
+                  fontSize: '12px',
+                  fontWeight: 400,
+                  color: 'var(--grey)',
+                  margin: '0 0 10px',
+                  lineHeight: 1.6,
+                }}>
+                  Vous avez un modèle en tête ? Importez une image de référence <span style={{ color: 'var(--grey-light)' }}>(optionnel)</span>
+                </p>
+                <input
+                  type="file"
+                  id="inspiration"
+                  name="inspiration"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setImagePreview(URL.createObjectURL(file))
+                    }
+                  }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label
+                  htmlFor="inspiration"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-dm-sans)',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    color: 'var(--noir)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    padding: '10px 16px',
+                    background: 'var(--cream)',
+                    transition: 'border-color 0.2s ease, background 0.2s ease',
+                    flexShrink: 0,
+                  }}
+                  className="upload-btn"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span id="inspiration-label">Importer une image</span>
+                </label>
+
+                {imagePreview && (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d7a3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <div className="img-preview-wrap" style={{ position: 'relative', height: '39px', width: '39px', flexShrink: 0 }}>
+                      <img
+                        src={imagePreview}
+                        alt="Aperçu"
+                        style={{
+                          height: '39px',
+                          width: '39px',
+                          objectFit: 'cover',
+                          border: '1px solid rgba(0,0,0,0.10)',
+                          display: 'block',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="img-remove-btn"
+                        onClick={() => {
+                          setImagePreview(null)
+                          const input = document.getElementById('inspiration') as HTMLInputElement
+                          if (input) input.value = ''
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '-6px',
+                          right: '-6px',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          background: 'var(--noir)',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 0,
+                        }}
+                        aria-label="Supprimer l'image"
+                      >
+                        <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                          <line x1="2" y1="2" x2="8" y2="8"/><line x1="8" y1="2" x2="2" y2="8"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </>
+                )}
+                </div>
+              </div>
+
               {/* Bannière ponctualité */}
               <PonctualiteBanner />
 
@@ -685,6 +791,10 @@ export function ContactSection() {
       <style>{`
         .contact-input:focus { border-color: var(--lavender-dark) !important; }
         .contact-input::placeholder { color: var(--grey-light); }
+        .upload-btn:hover { border-color: var(--lavender-dark) !important; background: var(--lavender-light) !important; }
+        .img-remove-btn { opacity: 0; transition: opacity 0.2s ease; }
+        .img-preview-wrap:hover .img-remove-btn { opacity: 1; }
+        @media (max-width: 1023px) { .img-remove-btn { opacity: 1 !important; } }
         .contact-submit:hover { background: var(--lavender-dark) !important; }
         @media (max-width: 900px) {
           .contact-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
