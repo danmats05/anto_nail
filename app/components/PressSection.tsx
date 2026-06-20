@@ -11,7 +11,7 @@ const certifications = [
   'CQP Prothésiste Ongulaire',
   'Certifiée OPI Pro',
   'Formation IBX System',
-  'Nail Artist Pro — Paris',
+  'Nail Artist Pro, Paris',
   'Membre CNEP',
 ]
 

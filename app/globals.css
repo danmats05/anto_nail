@@ -69,6 +69,13 @@ a, button { cursor: pointer; }
   color: var(--white);
 }
 
+/* Prevent iOS auto-zoom on form fields (triggered when font-size < 16px) */
+@media (max-width: 1023px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
 /* Scrollbar — masquée */
 html, body, * {
   scrollbar-width: none;

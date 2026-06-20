@@ -100,7 +100,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
           position: "fixed",
           top: "20px",
           left: "clamp(20px, 4vw, 48px)",
-          zIndex: 10,
+          zIndex: 50,
         }}
       >
         <a
@@ -173,7 +173,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
           style={{
             position: "relative",
             zIndex: 5,
-            maxWidth: "700px",
+            maxWidth: "min(90vw, 1200px)",
             marginTop: "80px",
           }}
         >
@@ -181,7 +181,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
             ref={headlineRef}
             style={{
               fontFamily: "var(--font-dm-sans)",
-              fontSize: "clamp(52px, 8.5vw, 180px)",
+              fontSize: "clamp(72px, 12vw, 240px)",
               fontWeight: 700,
               lineHeight: 0.95,
               letterSpacing: "-0.04em",
@@ -245,7 +245,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
               }}
             >
               Anto Nail, c&apos;est l&apos;art de transformer vos ongles en
-              véritable signature. Anto façonne chaque pose comme une œuvre — gel
+              véritable signature. Anto façonne chaque pose comme une œuvre : gel
               sculptural, nail art sur‑mesure, baby boomer naturel. Un
               savoir‑faire précis, une esthétique exigeante, pour des mains qui se
               remarquent et des ongles qui durent.

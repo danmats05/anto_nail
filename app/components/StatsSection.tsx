@@ -219,7 +219,7 @@ export function StatsSection() {
               maxWidth: '600px',
             }}
           >
-            "Chaque cliente mérite des mains sublimes — c'est ma promesse depuis 5 ans."
+            "Chaque cliente mérite des mains sublimes, c'est ma promesse depuis 5 ans."
           </p>
           <span
             style={{
@@ -230,7 +230,7 @@ export function StatsSection() {
               color: 'rgba(255,255,255,0.4)',
             }}
           >
-            — Anto
+            Anto
           </span>
         </div>
       </div>

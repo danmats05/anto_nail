@@ -1,5 +1,7 @@
-import Image from 'next/image'
+'use client'
 
+import Image from 'next/image'
+import { useLenis } from 'lenis/react'
 
 function IconInstagram() {
   return (
@@ -31,7 +33,42 @@ const SOCIALS = [
   { icon: <IconSnapchat />,  href: 'https://snapchat.com/add/antonail', label: 'Snapchat' },
 ]
 
+const PRESTATIONS = [
+  { label: 'Pose Gel',       index: 0 },
+  { label: 'Nail Art',       index: 1 },
+  { label: 'Baby Boomer',    index: 2 },
+  { label: 'Dépose & Soin',  index: 3 },
+  { label: 'Manucure',       index: 4 },
+  { label: 'Semi-Permanent', index: 5 },
+]
+
 export function Footer() {
+  const lenis = useLenis()
+
+  const scrollToTop = (e: React.MouseEvent) => {
+    e.preventDefault()
+    lenis?.scrollTo(0, { duration: 1.8, easing: (t: number) => 1 - Math.pow(1 - t, 4) })
+  }
+
+  const scrollToService = (e: React.MouseEvent, index: number) => {
+    e.preventDefault()
+    const isMobile = window.innerWidth < 1024
+    const section = document.getElementById('prestations')
+    if (!section) return
+
+    if (isMobile) {
+      lenis?.scrollTo(section, { duration: 1.2 })
+      setTimeout(() => {
+        const strip = document.getElementById('svc-strip')
+        if (!strip) return
+        const cardW = strip.clientWidth * 0.8 + 12
+        strip.scrollTo({ left: index * cardW, behavior: 'smooth' })
+      }, 900)
+    } else {
+      lenis?.scrollTo(section, { duration: 1.2 })
+    }
+  }
+
   return (
     <footer style={{ background: 'var(--white)' }}>
 
@@ -45,7 +82,7 @@ export function Footer() {
               fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 400,
               lineHeight: 1.75, color: 'var(--grey)', margin: '0 0 28px', maxWidth: '260px',
             }}>
-              Prothésiste ongulaire indépendante à Dakar. Je crée des poses gel, du nail art et des soins sur-mesure — chaque résultat est pensé pour vous.
+              Prothésiste ongulaire indépendante à Dakar. Je crée des poses gel, du nail art et des soins sur-mesure, chaque résultat est pensé pour vous.
             </p>
 
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -76,13 +113,18 @@ export function Footer() {
               Prestations
             </p>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {['Pose Gel', 'Nail Art', 'Baby Boomer', 'Dépose & Soin', 'Manucure', 'Semi-Permanent'].map((item) => (
-                <li key={item}>
-                  <a href="#prestations" className="footer-link" style={{
-                    fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 400,
-                    color: 'var(--noir)', textDecoration: 'none',
-                  }}>
-                    {item}
+              {PRESTATIONS.map(({ label, index }) => (
+                <li key={label}>
+                  <a
+                    href="#prestations"
+                    onClick={(e) => scrollToService(e, index)}
+                    className="footer-link"
+                    style={{
+                      fontFamily: 'var(--font-dm-sans)', fontSize: '13px', fontWeight: 400,
+                      color: 'var(--noir)', textDecoration: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    {label}
                   </a>
                 </li>
               ))}
@@ -114,13 +156,21 @@ export function Footer() {
           {/* Col 4 — Logo + socials */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ marginBottom: '20px' }}>
-              <Image
-                src="/logo-anto.png"
-                alt="Anto Nail"
-                width={240}
-                height={100}
-                style={{ objectFit: 'contain', objectPosition: 'center' }}
-              />
+              <a
+                href="#"
+                onClick={scrollToTop}
+                className="footer-logo"
+                style={{ display: 'block', textDecoration: 'none' }}
+                aria-label="Retour en haut de page"
+              >
+                <Image
+                  src="/logo-anto.png"
+                  alt="Anto Nail"
+                  width={240}
+                  height={100}
+                  style={{ objectFit: 'contain', objectPosition: 'center' }}
+                />
+              </a>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -170,7 +220,13 @@ export function Footer() {
             fontFamily: 'var(--font-dm-sans)', fontSize: '12px', fontWeight: 400,
             color: 'rgba(0,0,0,0.35)',
           }}>
-            Copyright {new Date().getFullYear()} Anto Nail©
+            Copyright {new Date().getFullYear()} Anto Nail© — Par{' '}
+            <a href="#" className="footer-link" style={{
+              fontSize: '12px', fontWeight: 400,
+              color: 'rgba(0,0,0,0.35)', textDecoration: 'none',
+            }}>
+              dj
+            </a>
           </span>
         </div>
       </div>
@@ -178,6 +234,8 @@ export function Footer() {
       <style>{`
         .footer-link { transition: color 0.25s ease; }
         .footer-link:hover { color: var(--lavender-dark) !important; }
+        .footer-logo { transition: opacity 0.25s ease; }
+        .footer-logo:hover { opacity: 0.75; }
         .social-icon { transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease; }
         .social-icon:hover { border-color: var(--lavender) !important; color: var(--lavender-dark) !important; background: rgba(255,255,255,0.8) !important; }
         @media (max-width: 960px) {

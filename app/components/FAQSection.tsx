@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: "Faut-il préparer ses ongles avant la séance ?",
-    a: "Non, arrivez les ongles naturels. Évitez simplement d'appliquer de l'huile ou de la crème le jour même — cela peut affecter l'adhérence du produit.",
+    a: "Non, arrivez les ongles naturels. Évitez simplement d'appliquer de l'huile ou de la crème le jour même, cela peut affecter l'adhérence du produit.",
   },
   {
     q: 'Vous déplacez-vous à domicile ?',

@@ -18,14 +18,14 @@ const services = [
   {
     id: '02',
     name: 'Nail Art',
-    description: 'Motifs uniques, créations sur-mesure. Du minimaliste au détaillé — votre imagination comme seule limite.',
+    description: 'Motifs uniques, créations sur-mesure. Du minimaliste au détaillé, votre imagination comme seule limite.',
     price: 'À partir de 80€',
     duration: '2h',
   },
   {
     id: '03',
     name: 'Baby Boomer',
-    description: 'La technique signature — dégradé naturel entre rose et blanc, effect ongles naturels sublimés.',
+    description: 'La technique signature, dégradé naturel entre rose et blanc, effet ongles naturels sublimés.',
     price: 'À partir de 75€',
     duration: '1h45',
   },

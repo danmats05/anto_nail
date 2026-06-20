@@ -12,7 +12,7 @@ const SERVICES = [
   { src: '/Pose%20gel.jpeg',              label: 'Pose Gel',      subtitle: 'Dès 39 000 FCFA' },
   { src: '/Nail%20art.jpeg',              label: 'Nail Art',      subtitle: 'Dès 52 000 FCFA' },
   { src: '/Baby%20boomer.jpeg',           label: 'Baby Boomer',   subtitle: 'Dès 49 000 FCFA' },
-  { src: '/D%C3%A9pose%20et%20soin.jpeg', label: 'Dépose & Soin', subtitle: 'Dès 23 000 FCFA' },
+  { src: '/depose-et-soin.jpeg', label: 'Dépose & Soin', subtitle: 'Dès 23 000 FCFA' },
   { src: '/Manicure.jpeg',                label: 'Manucure',      subtitle: 'Dès 30 000 FCFA' },
   { src: '/pink2.png',                    label: 'Semi-Permanent', subtitle: 'Dès 33 000 FCFA' },
 ]
@@ -79,6 +79,7 @@ function MobileSwipeServices() {
       {/* Swipe strip */}
       <div
         ref={stripRef}
+        id="svc-strip"
         className="svc-strip"
         style={{
           display: 'flex',

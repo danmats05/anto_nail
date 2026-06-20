@@ -614,7 +614,7 @@ export function Navbar() {
                         textDecoration: "none",
                         padding: "22px 0",
                         fontFamily: "var(--font-dm-sans)",
-                        fontSize: "clamp(40px, 6vw, 72px)",
+                        fontSize: "clamp(52px, 8vw, 100px)",
                         fontWeight: 700,
                         letterSpacing: "-0.03em",
                         color: "var(--noir)",

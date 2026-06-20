@@ -3,12 +3,12 @@
 import { useState } from "react";
 
 const SERVICES = [
-  "Pose Gel — dès 39 000 FCFA",
-  "Nail Art — dès 52 000 FCFA",
-  "Baby Boomer — dès 49 000 FCFA",
-  "Dépose & Soin — dès 23 000 FCFA",
-  "Manucure — dès 30 000 FCFA",
-  "Semi-Permanent — dès 33 000 FCFA",
+  "Pose Gel, dès39 000 FCFA",
+  "Nail Art, dès52 000 FCFA",
+  "Baby Boomer, dès49 000 FCFA",
+  "Dépose & Soin, dès23 000 FCFA",
+  "Manucure, dès30 000 FCFA",
+  "Semi-Permanent, dès33 000 FCFA",
 ];
 
 type Status = "idle" | "loading" | "success" | "error";
@@ -443,14 +443,14 @@ export function ContactSection() {
                   <span style={{ color: "var(--lavender-dark)" }}>*</span>
                   <span
                     style={{
-                      color: "var(--grey-light)",
-                      fontWeight: 400,
+                      color: "#b94040",
+                      fontWeight: 500,
                       textTransform: "none",
                       letterSpacing: 0,
                     }}
                   >
                     {" "}
-                    — Précisez l&apos;indicatif téléphonique
+                    Précisez l&apos;indicatif téléphonique
                   </span>
                 </label>
                 <input
@@ -550,7 +550,7 @@ export function ContactSection() {
                       letterSpacing: 0,
                     }}
                   >
-                    — optionnel
+                    optionnel
                   </span>
                 </label>
                 <textarea
@@ -616,7 +616,7 @@ export function ContactSection() {
                       color: "var(--grey)",
                     }}
                   >
-                    J&apos;ai lu et j&apos;accepte la politique de ponctualité —
+                    J&apos;ai lu et j&apos;accepte la politique de ponctualité :
                     tout retard non signalé entraîne un supplément de 1 000
                     FCFA.
                   </span>

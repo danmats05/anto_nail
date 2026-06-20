@@ -11,15 +11,15 @@ gsap.registerPlugin(ScrollTrigger)
 const CARD = 460
 
 const GALLERY_IMAGES = [
-  '/pink1.png',
-  '/pink2.png',
-  '/pink3.png',
-  '/pink4.png',
-  '/hero.png',
+  '/temoignages/1.jpeg',
+  '/temoignages/2.jpeg',
+  '/temoignages/3.jpeg',
+  '/temoignages/4.jpeg',
+  '/temoignages/5.jpeg',
   '/Pose%20gel.jpeg',
-  '/Nail%20art.jpeg',
+  '/temoignages/6.jpeg',
   '/Baby%20boomer.jpeg',
-  '/D%C3%A9pose%20et%20soin.jpeg',
+  '/depose-et-soin.jpeg',
   '/Manicure.jpeg',
 ]
 const GAP  = 20
@@ -30,13 +30,15 @@ const TESTIMONIALS = [
     sub: 'Cliente Anto Nail',
     initials: 'LM',
     avatarBg: '#E8D8F5',
-    text: "Anto est une vraie artiste. J'avais des ongles abîmés depuis des années — en 3 séances elle les a complètement transformés. Le baby boomer est parfait.",
+    image: '/temoignages/1.jpeg',
+    text: "Anto est une vraie artiste. J'avais des ongles abîmés depuis des années, en 3 séances elle les a complètement transformés. Le baby boomer est parfait.",
   },
   {
     name: 'Camille R.',
     sub: 'Cliente Anto Nail',
     initials: 'CR',
     avatarBg: '#F2C8D8',
+    image: '/temoignages/2.jpeg',
     text: "Ambiance chaleureuse, très pro. Elle prend le temps d'expliquer chaque étape et adapte vraiment les soins. Le résultat dure bien plus longtemps.",
   },
   {
@@ -44,13 +46,15 @@ const TESTIMONIALS = [
     sub: 'Cliente Anto Nail',
     initials: 'ST',
     avatarBg: '#D4A853',
-    text: "J'ai demandé un nail art assez complexe — des fleurs en relief avec des dégradés — et le rendu était absolument bluffant. Je ne vais plus nulle part ailleurs.",
+    image: '/temoignages/3.jpeg',
+    text: "J'ai demandé un nail art assez complexe, des fleurs en relief avec des dégradés, et le rendu était absolument bluffant. Je ne vais plus nulle part ailleurs.",
   },
   {
     name: 'Aissatou B.',
     sub: 'Cliente Anto Nail',
     initials: 'AB',
     avatarBg: '#C9A8E0',
+    image: '/temoignages/4.jpeg',
     text: "Les ongles en gel qu'elle pose tiennent vraiment longtemps. Elle est minutieuse, propre, et le résultat est toujours impeccable. Je recommande à 100%.",
   },
   {
@@ -58,6 +62,7 @@ const TESTIMONIALS = [
     sub: 'Cliente Anto Nail',
     initials: 'MK',
     avatarBg: '#F2C8D8',
+    image: '/temoignages/5.jpeg',
     text: "La séance manucure était un vrai moment de détente. Anto a une main légère et un sens esthétique incroyable. Mes ongles n'ont jamais été aussi beaux.",
   },
   {
@@ -65,7 +70,8 @@ const TESTIMONIALS = [
     sub: 'Cliente Anto Nail',
     initials: 'ID',
     avatarBg: '#9B72C8',
-    text: "Le semi-permanent tient plus de 3 semaines sans éclat. Anto prend soin de la santé de l'ongle avant tout — c'est rare et précieux. Merci infiniment !",
+    image: '/temoignages/6.jpeg',
+    text: "Le semi-permanent tient plus de 3 semaines sans éclat. Anto prend soin de la santé de l'ongle avant tout, c'est rare et précieux. Merci infiniment !",
   },
 ]
 
@@ -170,19 +176,19 @@ export function TestimonialsSection() {
           fontFamily: 'var(--font-dm-sans)', fontSize: '14px',
           fontWeight: 400, color: 'var(--grey)', margin: 0,
         }}>
-          +500 clientes satisfaites · Note moyenne 5/5
+          +100 clientes satisfaites · Note moyenne 4,5/5
         </p>
       </div>
 
       {/* Drag strip */}
       <div style={{ position: 'relative' }}>
-        {/* Edge fade — left */}
+        {/* Edge fadeleft */}
         <div style={{
           position: 'absolute', left: 0, top: 0, bottom: 0, width: '160px', zIndex: 2,
           background: 'linear-gradient(to right, var(--cream) 0%, transparent 100%)',
           pointerEvents: 'none',
         }} />
-        {/* Edge fade — right */}
+        {/* Edge faderight */}
         <div style={{
           position: 'absolute', right: 0, top: 0, bottom: 0, width: '160px', zIndex: 2,
           background: 'linear-gradient(to left, var(--cream) 0%, transparent 100%)',
@@ -192,6 +198,7 @@ export function TestimonialsSection() {
         {/* Scrollable wrapper */}
         <div
           ref={wrapperRef}
+          data-lenis-prevent
           style={{
             overflowX: 'scroll',
             overflowY: 'hidden',
@@ -259,10 +266,10 @@ export function TestimonialsSection() {
                 {/* Bottom: image */}
                 <div style={{ position: 'relative', flex: 1 }}>
                   <Image
-                    src="/hand darkskin.png"
+                    src={t.image}
                     alt={`Avis de ${t.name}`}
                     fill
-                    style={{ objectFit: 'contain', objectPosition: 'center bottom' }}
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
                   />
                 </div>
               </div>

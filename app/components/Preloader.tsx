@@ -24,7 +24,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       ease: 'power2.inOut',
       onUpdate: () => {
         if (counterRef.current) {
-          counterRef.current.textContent = String(Math.round(obj.val))
+          counterRef.current.textContent = String(Math.round(obj.val)) + '%'
         }
       },
     })
@@ -85,7 +85,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
           userSelect: 'none',
         }}
       >
-        0
+        0%
       </span>
     </div>
   )
