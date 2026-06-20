@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
+import { VercelAnalytics } from "./components/VercelAnalytics";
 import { LenisProvider } from "./providers/LenisProvider";
 import "./globals.css";
 
@@ -33,7 +33,7 @@ export default function RootLayout({
     <html lang="fr" className={`${cormorant.variable} ${dmSans.variable}`}>
       <body className="min-h-full flex flex-col antialiased">
         <LenisProvider>{children}</LenisProvider>
-        <Analytics />
+        <VercelAnalytics />
       </body>
     </html>
   );
