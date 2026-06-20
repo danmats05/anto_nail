@@ -91,13 +91,13 @@ export function TestimonialsSection() {
     const inner = galleryInnerRef.current
     if (!el || !inner) return
     if (galleryOpen) {
-      gsap.set(inner, { y: 0 })
+      gsap.set(inner, { clipPath: 'none' })
       gsap.fromTo(el, { height: 0 }, { height: 'auto', duration: 0.65, ease: 'power2.inOut' })
     } else {
-      const h = inner.offsetHeight
       gsap.timeline({
         onComplete: () => {
-          gsap.set(inner, { y: 0 })
+          gsap.set(el, { height: 0 })
+          gsap.set(inner, { clipPath: 'none' })
           if (galleryCTARef.current) {
             lenis?.scrollTo(galleryCTARef.current, {
               duration: 1.0,
@@ -107,8 +107,8 @@ export function TestimonialsSection() {
           }
         }
       })
-        .to(inner, { y: -h, duration: 0.5, ease: 'power2.inOut' }, 0)
-        .to(el,    { height: 0, duration: 0.5, ease: 'power2.inOut' }, 0)
+        .to(inner, { clipPath: 'inset(100% 0 0% 0)', duration: 0.55, ease: 'power2.inOut' })
+        .to(el,    { height: 0, duration: 0.2, ease: 'power3.in' }, '-=0.05')
     }
   }, [galleryOpen])
 
