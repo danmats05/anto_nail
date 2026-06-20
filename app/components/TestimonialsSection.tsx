@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useLenis } from 'lenis/react'
 import { btnPrimary } from '../lib/hooks'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -80,7 +81,9 @@ export function TestimonialsSection() {
   const wrapperRef  = useRef<HTMLDivElement>(null)
   const headRef     = useRef<HTMLDivElement>(null)
   const galleryRef  = useRef<HTMLDivElement>(null)
+  const galleryCTARef = useRef<HTMLDivElement>(null)
   const [galleryOpen, setGalleryOpen] = useState(false)
+  const lenis = useLenis()
 
   useEffect(() => {
     const el = galleryRef.current
@@ -305,7 +308,7 @@ export function TestimonialsSection() {
       </div>
 
       {/* CTA galerie */}
-      <div style={{ textAlign: 'center', marginTop: '56px' }}>
+      <div ref={galleryCTARef} style={{ textAlign: 'center', marginTop: '56px' }}>
         <button
           onClick={() => setGalleryOpen(o => !o)}
           style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
@@ -345,7 +348,18 @@ export function TestimonialsSection() {
           pointerEvents: galleryOpen ? 'auto' : 'none',
         }}>
           <button
-            onClick={() => setGalleryOpen(false)}
+            onClick={() => {
+              setGalleryOpen(false)
+              setTimeout(() => {
+                if (galleryCTARef.current) {
+                  lenis?.scrollTo(galleryCTARef.current, {
+                    duration: 1.2,
+                    offset: -120,
+                    easing: (t: number) => 1 - Math.pow(1 - t, 4),
+                  })
+                }
+              }, 500)
+            }}
             style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
             className="gallery-cta"
           >
