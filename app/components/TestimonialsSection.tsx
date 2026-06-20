@@ -80,18 +80,25 @@ export function TestimonialsSection() {
   const sectionRef  = useRef<HTMLElement>(null)
   const wrapperRef  = useRef<HTMLDivElement>(null)
   const headRef     = useRef<HTMLDivElement>(null)
-  const galleryRef  = useRef<HTMLDivElement>(null)
-  const galleryCTARef = useRef<HTMLDivElement>(null)
+  const galleryRef      = useRef<HTMLDivElement>(null)
+  const galleryInnerRef = useRef<HTMLDivElement>(null)
+  const galleryCTARef   = useRef<HTMLDivElement>(null)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const lenis = useLenis()
 
   useEffect(() => {
-    const el = galleryRef.current
-    if (!el) return
+    const el    = galleryRef.current
+    const inner = galleryInnerRef.current
+    if (!el || !inner) return
     if (galleryOpen) {
+      gsap.set(inner, { y: 0 })
       gsap.fromTo(el, { height: 0 }, { height: 'auto', duration: 0.65, ease: 'power2.inOut' })
     } else {
-      gsap.to(el, { height: 0, duration: 0.5, ease: 'power2.inOut' })
+      const h = inner.offsetHeight
+      gsap.timeline()
+        .to(inner, { y: -h, duration: 0.5, ease: 'power2.inOut' }, 0)
+        .to(el,    { height: 0, duration: 0.5, ease: 'power2.inOut' }, 0)
+        .set(inner, { y: 0 })
     }
   }, [galleryOpen])
 
@@ -321,51 +328,42 @@ export function TestimonialsSection() {
 
       {/* Galerie déroulante */}
       <div ref={galleryRef} style={{ overflow: 'hidden', height: 0 }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '8px',
-          padding: '40px clamp(20px, 5vw, 48px) 0',
-        }}>
-          {GALLERY_IMAGES.map((src, i) => (
-            <div
-              key={i}
-              style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden' }}
+        <div ref={galleryInnerRef}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: '8px',
+            padding: '40px clamp(20px, 5vw, 48px) 0',
+          }}>
+            {GALLERY_IMAGES.map((src, i) => (
+              <div
+                key={i}
+                style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden' }}
+              >
+                <Image
+                  src={src}
+                  alt={`Réalisation Anto Nail ${i + 1}`}
+                  fill
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                />
+              </div>
+            ))}
+          </div>
+          <div style={{
+            textAlign: 'center', padding: '40px 0 8px',
+            opacity: galleryOpen ? 1 : 0,
+            transition: 'opacity 0.4s ease',
+            pointerEvents: galleryOpen ? 'auto' : 'none',
+          }}>
+            <button
+              onClick={() => setGalleryOpen(false)}
+              style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
+              className="gallery-cta"
             >
-              <Image
-                src={src}
-                alt={`Réalisation Anto Nail ${i + 1}`}
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
-              />
-            </div>
-          ))}
-        </div>
-        <div style={{
-          textAlign: 'center', padding: '40px 0 8px',
-          opacity: galleryOpen ? 1 : 0,
-          transition: 'opacity 0.4s ease',
-          pointerEvents: galleryOpen ? 'auto' : 'none',
-        }}>
-          <button
-            onClick={() => {
-              setGalleryOpen(false)
-              setTimeout(() => {
-                if (galleryCTARef.current) {
-                  lenis?.scrollTo(galleryCTARef.current, {
-                    duration: 1.2,
-                    offset: -120,
-                    easing: (t: number) => 1 - Math.pow(1 - t, 4),
-                  })
-                }
-              }, 500)
-            }}
-            style={{ ...btnPrimary, display: 'inline-flex', alignItems: 'center', gap: '10px' }}
-            className="gallery-cta"
-          >
-            Fermer la galerie
-            <span style={{ fontSize: '14px' }}>↑</span>
-          </button>
+              Fermer la galerie
+              <span style={{ fontSize: '14px' }}>↑</span>
+            </button>
+          </div>
         </div>
       </div>
 
