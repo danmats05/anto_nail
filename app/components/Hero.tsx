@@ -66,24 +66,26 @@ export function Hero({ ready = false }: { ready?: boolean }) {
     if (!ready || animatedRef.current) return;
     animatedRef.current = true;
 
-    gsap.set(bottomRef.current, { opacity: 0, y: 24 });
-
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.05 });
+      gsap.set(headlineRef.current, { y: 48 });
+      gsap.set(bottomRef.current, { y: 28 });
 
-      if (headlineRef.current) {
-        tl.from(headlineRef.current, {
-          y: 60,
-          opacity: 0,
-          duration: 0.7,
-          ease: "power4.out",
-        });
-      }
+      const tl = gsap.timeline({ delay: 0.15 });
 
+      tl.to(logoRef.current, {
+        opacity: 1,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+      tl.to(
+        headlineRef.current,
+        { opacity: 1, y: 0, duration: 1.0, ease: "power4.out" },
+        "-=0.5",
+      );
       tl.to(
         bottomRef.current,
-        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
-        "-=0.25",
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        "-=0.55",
       );
     }, sectionRef);
 
@@ -101,6 +103,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
           top: "20px",
           left: "clamp(20px, 4vw, 48px)",
           zIndex: 50,
+          opacity: 0,
         }}
       >
         <a
@@ -188,6 +191,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
               color: "var(--white)",
               margin: 0,
               cursor: "default",
+              opacity: 0,
             }}
           >
             <FlipText text="Sublimez" />
@@ -205,6 +209,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "space-between",
+            opacity: 0,
             gap: "40px",
           }}
         >
