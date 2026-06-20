@@ -82,6 +82,7 @@ export function TestimonialsSection() {
   const headRef     = useRef<HTMLDivElement>(null)
   const galleryRef      = useRef<HTMLDivElement>(null)
   const galleryInnerRef = useRef<HTMLDivElement>(null)
+  const galleryOverlayRef = useRef<HTMLDivElement>(null)
   const galleryCTARef   = useRef<HTMLDivElement>(null)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const lenis = useLenis()
@@ -94,9 +95,16 @@ export function TestimonialsSection() {
       gsap.set(inner, { clipPath: 'none' })
       gsap.fromTo(el, { height: 0 }, { height: 'auto', duration: 0.65, ease: 'power2.inOut' })
     } else {
-      gsap.timeline({
+      const overlay = galleryOverlayRef.current
+      if (!overlay) return
+      gsap.set(overlay, { y: '-100%' })
+      gsap.to(overlay, {
+        y: '0%',
+        duration: 0.7,
+        ease: 'power3.inOut',
         onComplete: () => {
           gsap.set(el, { height: 0 })
+          gsap.set(overlay, { y: '-100%' })
           gsap.set(inner, { clipPath: 'none' })
           if (galleryCTARef.current) {
             lenis?.scrollTo(galleryCTARef.current, {
@@ -105,10 +113,8 @@ export function TestimonialsSection() {
               easing: (t: number) => 1 - Math.pow(1 - t, 4),
             })
           }
-        }
+        },
       })
-        .to(inner, { clipPath: 'inset(100% 0 0% 0)', duration: 0.55, ease: 'power2.inOut' })
-        .to(el,    { height: 0, duration: 0.2, ease: 'power3.in' }, '-=0.05')
     }
   }, [galleryOpen])
 
@@ -337,7 +343,15 @@ export function TestimonialsSection() {
       </div>
 
       {/* Galerie déroulante */}
-      <div ref={galleryRef} style={{ overflow: 'hidden', height: 0 }}>
+      <div ref={galleryRef} style={{ position: 'relative', overflow: 'hidden', height: 0 }}>
+        {/* Overlay fermeture — rideau blanc glissant de haut en bas */}
+        <div ref={galleryOverlayRef} style={{
+          position: 'absolute', inset: 0,
+          background: 'var(--cream)',
+          transform: 'translateY(-100%)',
+          zIndex: 10,
+          pointerEvents: 'none',
+        }} />
         <div ref={galleryInnerRef}>
           <div style={{
             display: 'grid',
