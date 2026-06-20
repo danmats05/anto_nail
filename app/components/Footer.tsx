@@ -373,7 +373,7 @@ export function Footer() {
               className="footer-dj-link"
             >
               <Image
-                src="/dj black (1).png"
+                src="/dj-logo.png"
                 alt="Dan Joris — Portfolio"
                 width={28}
                 height={28}
