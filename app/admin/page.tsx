@@ -497,7 +497,7 @@ export default function AdminPage() {
                 Congés & imprévus
               </p>
 
-              <div className="admin-conges-row">
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px", width: "100%" }}>
                 <input
                   type="date"
                   value={newDate}
@@ -512,11 +512,15 @@ export default function AdminPage() {
                     padding:    "10px 14px",
                     outline:    "none",
                     cursor:     "pointer",
+                    width:      "100%",
+                    boxSizing:  "border-box",
+                    minHeight:  "44px",
+                    display:    "block",
                   }}
                 />
                 {/* Récurrence toggle + bouton groupés */}
-                <div className="admin-conges-controls">
-                  <div style={{ display: "flex", background: "rgba(0,0,0,0.04)", padding: "3px" }}>
+                <div style={{ display: "flex", gap: "8px", width: "100%", alignItems: "stretch" }}>
+                  <div style={{ display: "flex", background: "rgba(0,0,0,0.04)", padding: "3px", flex: 1 }}>
                     {([false, true] as const).map(v => (
                       <button
                         key={String(v)}
@@ -535,6 +539,8 @@ export default function AdminPage() {
                           cursor:        "pointer",
                           transition:    "all 0.18s",
                           boxShadow:     newAnnual === v ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                          flex:          1,
+                          textAlign:     "center",
                         }}
                       >
                         {v ? "Chaque an" : "Une fois"}
@@ -544,7 +550,7 @@ export default function AdminPage() {
                   <button
                     onClick={addManual}
                     className="admin-btn-primary"
-                    style={{ ...btnPrimary, padding: "0 24px", fontSize: "11px", alignSelf: "stretch" }}
+                    style={{ ...btnPrimary, padding: "0 20px", fontSize: "11px", flexShrink: 0 }}
                   >
                     Ajouter
                   </button>
