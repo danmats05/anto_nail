@@ -8,8 +8,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
-  const config = getScheduleConfig();
+export async function GET() {
+  const config = await getScheduleConfig();
   return NextResponse.json({
     schedule: config.schedule,
     blocked:  getBlockedPatterns(config),
@@ -18,6 +18,6 @@ export function GET() {
 
 export async function PUT(req: NextRequest) {
   const body: ScheduleConfig = await req.json();
-  saveScheduleConfig(body);
+  await saveScheduleConfig(body);
   return NextResponse.json({ ok: true });
 }
