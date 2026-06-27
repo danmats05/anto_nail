@@ -50,10 +50,8 @@ export async function getScheduleConfig(): Promise<ScheduleConfig> {
 }
 
 export async function saveScheduleConfig(config: ScheduleConfig): Promise<void> {
-  const { error } = await supabase
-    .from("settings")
-    .update({ value: config })
-    .eq("key", "schedule");
+  await supabase.from("settings").delete().eq("key", "schedule");
+  const { error } = await supabase.from("settings").insert({ key: "schedule", value: config });
   if (error) {
     console.error("saveScheduleConfig error:", error);
     throw error;
