@@ -1236,7 +1236,7 @@ function LoginScreen({ pwd, setPwd, error, onSubmit }: {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f9fafb", position: "relative" }}>
+    <div style={{ minHeight: "100vh", background: "var(--cream)", position: "relative" }}>
 
       {/* Grille qui s'estompe depuis le coin haut gauche */}
       <div style={{
