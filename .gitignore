@@ -34,5 +34,5 @@ yarn-error.log*
 # Vercel
 .vercel
 
-# Data local (remplacé par Supabase en production)
-data/*.json
+# Appointments stockés dans Supabase, on ne commit pas ce fichier
+data/appointments.json

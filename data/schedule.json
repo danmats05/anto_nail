@@ -1,0 +1,54 @@
+{
+  "schedule": {
+    "lun": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    },
+    "mar": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    },
+    "mer": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    },
+    "jeu": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    },
+    "ven": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    },
+    "sam": {
+      "enabled": true,
+      "open": "15:00",
+      "close": "20:00"
+    },
+    "dim": {
+      "enabled": false,
+      "open": "09:00",
+      "close": "18:00"
+    }
+  },
+  "enabledHolidays": [
+    "new-year",
+    "independence",
+    "labour",
+    "assumption",
+    "toussaint",
+    "christmas"
+  ],
+  "manual": [
+    {
+      "id": "1b77b1dc-8c76-4079-8ed1-968a15328db8",
+      "date": "2026-12-05",
+      "annual": false
+    }
+  ]
+}

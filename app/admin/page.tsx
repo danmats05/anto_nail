@@ -141,12 +141,7 @@ export default function AdminPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ schedule, enabledHolidays: [...holidays], manual }),
     });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Save schedule failed:", errText);
-      alert("Erreur sauvegarde planning:\n" + errText);
-      return;
-    }
+    if (!res.ok) console.error("Save schedule failed:", await res.text());
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);

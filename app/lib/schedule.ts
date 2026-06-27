@@ -1,3 +1,9 @@
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { join } from "path";
+
+const DATA_DIR = join(process.cwd(), "data");
+const FILE     = join(DATA_DIR, "schedule.json");
+
 export type DaySchedule  = { enabled: boolean; open: string; close: string };
 export type ManualBlock  = { date: string; annual: boolean };
 
@@ -26,56 +32,20 @@ export const DEFAULT_SCHEDULE: Record<string, DaySchedule> = {
   dim: { enabled: false, open: "09:00", close: "18:00" },
 };
 
-const DEFAULT_CONFIG: ScheduleConfig = {
-  schedule: DEFAULT_SCHEDULE,
-  enabledHolidays: [],
-  manual: [],
-};
-
-function headers() {
-  return {
-    "apikey":        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-    "Content-Type":  "application/json",
-  };
+function ensureDir() {
+  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function base() {
-  return `${process.env.SUPABASE_URL}/rest/v1/settings`;
+export function getScheduleConfig(): ScheduleConfig {
+  ensureDir();
+  if (!existsSync(FILE)) return { schedule: DEFAULT_SCHEDULE, enabledHolidays: [], manual: [] };
+  try { return JSON.parse(readFileSync(FILE, "utf-8")); }
+  catch { return { schedule: DEFAULT_SCHEDULE, enabledHolidays: [], manual: [] }; }
 }
 
-export async function getScheduleConfig(): Promise<ScheduleConfig> {
-  try {
-    const res = await fetch(`${base()}?key=eq.schedule&select=value`, {
-      headers: headers(),
-      cache: "no-store",
-    });
-    if (!res.ok) return DEFAULT_CONFIG;
-    const rows = await res.json();
-    if (!rows || rows.length === 0) return DEFAULT_CONFIG;
-    return rows[0].value as ScheduleConfig;
-  } catch {
-    return DEFAULT_CONFIG;
-  }
-}
-
-export async function saveScheduleConfig(config: ScheduleConfig): Promise<void> {
-  // Supprime l'ancienne ligne
-  await fetch(`${base()}?key=eq.schedule`, {
-    method: "DELETE",
-    headers: headers(),
-  });
-  // Insère la nouvelle
-  const res = await fetch(base(), {
-    method: "POST",
-    headers: { ...headers(), "Prefer": "return=minimal" },
-    body: JSON.stringify({ key: "schedule", value: config }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("saveScheduleConfig:", err);
-    throw new Error(err);
-  }
+export function saveScheduleConfig(config: ScheduleConfig): void {
+  ensureDir();
+  writeFileSync(FILE, JSON.stringify(config, null, 2));
 }
 
 export function getBlockedPatterns(config: ScheduleConfig): string[] {

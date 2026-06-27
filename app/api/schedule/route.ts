@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
 import {
   getScheduleConfig,
   saveScheduleConfig,
@@ -8,8 +6,10 @@ import {
   type ScheduleConfig,
 } from "../../lib/schedule";
 
-export async function GET() {
-  const config = await getScheduleConfig();
+export const dynamic = "force-dynamic";
+
+export function GET() {
+  const config = getScheduleConfig();
   return NextResponse.json({
     schedule: config.schedule,
     blocked:  getBlockedPatterns(config),
@@ -18,6 +18,6 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const body: ScheduleConfig = await req.json();
-  await saveScheduleConfig(body);
+  saveScheduleConfig(body);
   return NextResponse.json({ ok: true });
 }
