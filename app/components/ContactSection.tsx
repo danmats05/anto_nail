@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { CalendarPicker } from "./CalendarPicker";
-import { WarningCircle, CalendarX, CheckFat } from "@phosphor-icons/react";
+import { WarningCircle, CalendarX, CheckFat, Timer } from "@phosphor-icons/react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const SERVICES = [
   "Pose Gel, dès39 000 FCFA",
@@ -18,147 +20,56 @@ type ConflictInfo = { count: number; date: string; time: string };
 
 function PonctualiteBanner() {
   return (
-    <div
-      style={{
-        background: "var(--cream)",
-        border: "1px solid rgba(0,0,0,0.08)",
-        borderLeft: "3px solid var(--amber)",
-        display: "grid",
-        gridTemplateColumns: "auto 1fr",
-      }}
-    >
-      {/* Left — chiffre */}
-      <div
-        style={{
-          padding: "24px 28px",
-          borderRight: "1px solid rgba(0,0,0,0.08)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "4px",
-          minWidth: "100px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "30px",
-            fontWeight: 700,
-            color: "var(--amber)",
-            lineHeight: 1,
-            letterSpacing: "-0.03em",
-          }}
-        >
-          +1 000
-        </span>
-        <span
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "9px",
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "var(--amber)",
-          }}
-        >
-          FCFA
-        </span>
-        <span
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "8px",
-            fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--grey-light)",
-            textAlign: "center",
-            lineHeight: 1.4,
-            marginTop: "4px",
-          }}
-        >
-          SUPPLÉMENT
-          <br />
-          RETARD
-        </span>
-      </div>
+    <div style={{
+      position: "relative",
+      border: "1px solid rgba(155, 114, 200, 0.22)",
+      padding: "22px 22px 22px 22px",
+      background: "linear-gradient(135deg, rgba(201,168,224,0.07) 0%, transparent 70%)",
+      overflow: "hidden",
+    }}>
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+        {/* Icône */}
+        <div style={{
+          width: "40px", height: "40px", flexShrink: 0,
+          background: "rgba(155, 114, 200, 0.10)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Timer size={20} weight="duotone" color="#9B72C8" />
+        </div>
 
-      {/* Right — texte */}
-      <div style={{ padding: "24px 28px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "10px",
-            fontWeight: 700,
-            letterSpacing: "0.24em",
-            textTransform: "uppercase",
-            color: "var(--grey)",
-            margin: "0 0 10px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <span
-            style={{
-              width: "20px",
-              height: "1px",
-              background: "var(--grey-light)",
-              flexShrink: 0,
-            }}
-          />
-          Règle importante
-        </p>
-        <h3
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "clamp(14px, 1.4vw, 17px)",
-            fontWeight: 700,
-            color: "var(--noir)",
-            margin: "0 0 12px",
-            lineHeight: 1.2,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          Politique de ponctualité
-        </h3>
-        <p
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "12.5px",
-            fontWeight: 400,
-            lineHeight: 1.8,
-            color: "var(--grey)",
-            margin: "0 0 6px",
-          }}
-        >
-          Votre temps et celui des autres clientes sont précieux.
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "12.5px",
-            fontWeight: 600,
-            lineHeight: 1.8,
-            color: "var(--noir)",
-            margin: "0 0 6px",
-          }}
-        >
-          Tout retard non signalé entraîne automatiquement un supplément de 1
-          000 FCFA sur le tarif de votre séance.
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "12.5px",
-            fontWeight: 400,
-            lineHeight: 1.8,
-            color: "var(--grey)",
-            margin: 0,
-          }}
-        >
-          Merci de me prévenir dès que possible en cas d&apos;empêchement.
-        </p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Label + badge */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            flexWrap: "wrap", gap: "8px", marginBottom: "10px",
+          }}>
+            <p style={{
+              fontFamily: "var(--font-dm-sans)", fontSize: "10px", fontWeight: 700,
+              letterSpacing: "0.22em", textTransform: "uppercase",
+              color: "var(--grey)", margin: 0,
+            }}>
+              Politique de ponctualité
+            </p>
+            <span style={{
+              fontFamily: "var(--font-dm-sans)", fontSize: "11px", fontWeight: 700,
+              letterSpacing: "0.06em", color: "#9B72C8",
+              background: "rgba(155, 114, 200, 0.10)",
+              padding: "3px 10px", whiteSpace: "nowrap",
+            }}>
+              +1 000FCFA
+            </span>
+          </div>
+
+          {/* Texte */}
+          <p style={{
+            fontFamily: "var(--font-dm-sans)", fontSize: "12.5px",
+            lineHeight: 1.75, color: "var(--grey)", margin: 0,
+          }}>
+            Tout retard non signalé entraîne automatiquement un supplément de{" "}
+            <strong style={{ color: "var(--noir)", fontWeight: 600, whiteSpace: "nowrap" }}>1 000FCFA</strong>{" "}
+            sur le tarif de votre séance. Merci de me prévenir dès que possible en cas d&apos;empêchement.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -167,10 +78,10 @@ function PonctualiteBanner() {
 export function ContactSection() {
   const [form, setForm] = useState({
     nom: "",
-    whatsapp: "",
     prestation: "",
     message: "",
   });
+  const [phone, setPhone] = useState<string | undefined>(undefined);
   const [booking, setBooking] = useState({ date: "", time: "" });
   const [confirmed, setConfirmed] = useState<{ prestation: string; date: string; time: string; withConflict?: boolean } | null>(null);
   const [accepted, setAccepted] = useState(false);
@@ -220,6 +131,7 @@ export function ContactSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          whatsapp: phone ?? "",
           date: booking.date,
           time: booking.time,
           image: imageBase64,
@@ -228,7 +140,8 @@ export function ContactSection() {
       if (res.ok) {
         setConfirmed({ prestation: form.prestation.split(",")[0], date: booking.date, time: booking.time, withConflict });
         setStatus("success");
-        setForm({ nom: "", whatsapp: "", prestation: "", message: "" });
+        setForm({ nom: "", prestation: "", message: "" });
+        setPhone(undefined);
         setBooking({ date: "", time: "" });
         setImagePreview(null);
         setImageBase64(null);
@@ -501,11 +414,8 @@ export function ContactSection() {
               </div>
 
               {/* WhatsApp */}
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-              >
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 <label
-                  htmlFor="whatsapp"
                   style={{
                     fontFamily: "var(--font-dm-sans)",
                     fontSize: "11px",
@@ -515,40 +425,14 @@ export function ContactSection() {
                     color: "var(--noir)",
                   }}
                 >
-                  Numéro WhatsApp{" "}
-                  <span style={{ color: "var(--lavender-dark)" }}>*</span>
-                  <span
-                    style={{
-                      color: "#b94040",
-                      fontWeight: 500,
-                      textTransform: "none",
-                      letterSpacing: 0,
-                    }}
-                  >
-                    {" "}
-                    Précisez l&apos;indicatif téléphonique
-                  </span>
+                  Numéro WhatsApp <span style={{ color: "var(--lavender-dark)" }}>*</span>
                 </label>
-                <input
-                  id="whatsapp"
-                  name="whatsapp"
-                  type="tel"
-                  required
-                  value={form.whatsapp}
-                  onChange={handleChange}
-                  placeholder="Exemple: +221 77 570 29 89"
-                  className="contact-input"
-                  style={{
-                    fontFamily: "var(--font-dm-sans)",
-                    fontSize: "14px",
-                    fontWeight: 400,
-                    color: "var(--noir)",
-                    background: "var(--cream)",
-                    border: "1px solid rgba(0,0,0,0.12)",
-                    padding: "14px 16px",
-                    outline: "none",
-                    width: "100%",
-                  }}
+                <PhoneInput
+                  international
+                  defaultCountry="SN"
+                  value={phone}
+                  onChange={setPhone}
+                  className="phone-input-wrapper"
                 />
               </div>
 
@@ -617,10 +501,7 @@ export function ContactSection() {
                 }}
               >
                 Les jours grisés correspondent à mes indisponibilités et les
-                horaires affichés correspondent à mes créneaux disponibles. Si
-                aucun créneau ne vous convient, précisez vos disponibilités dans
-                le champ ci-dessous et je ferai de mon mieux pour
-                m&apos;adapter.
+                horaires affichés correspondent à mes créneaux disponibles.
               </p>
 
               {/* Message */}
@@ -1037,6 +918,12 @@ export function ContactSection() {
       )}
 
       <style>{`
+        .phone-input-wrapper { display: flex; align-items: center; background: var(--cream); border: 1px solid rgba(0,0,0,0.12); }
+        .phone-input-wrapper:focus-within { border-color: var(--lavender-dark); }
+        .phone-input-wrapper .PhoneInputCountry { padding: 0 10px 0 14px; border-right: 1px solid rgba(0,0,0,0.10); }
+        .phone-input-wrapper .PhoneInputCountrySelect { background: transparent; border: none; outline: none; cursor: pointer; font-size: 14px; }
+        .phone-input-wrapper .PhoneInputInput { font-family: var(--font-dm-sans); font-size: 14px; font-weight: 400; color: var(--noir); background: transparent; border: none; outline: none; padding: 14px 16px; width: 100%; }
+        .phone-input-wrapper .PhoneInputInput::placeholder { color: var(--grey-light); }
         .contact-input:focus { border-color: var(--lavender-dark) !important; }
         .contact-input::placeholder { color: var(--grey-light); }
         .upload-btn:hover { border-color: var(--lavender-dark) !important; background: var(--lavender-light) !important; }

@@ -527,6 +527,7 @@ export default function AdminPage() {
                           fontWeight:    newAnnual === v ? 700 : 400,
                           letterSpacing: "0.08em",
                           textTransform: "uppercase",
+                          whiteSpace:    "nowrap",
                           color:         newAnnual === v ? "var(--noir)" : "var(--grey)",
                           background:    newAnnual === v ? "var(--white)" : "none",
                           border:        "none",
@@ -536,7 +537,7 @@ export default function AdminPage() {
                           boxShadow:     newAnnual === v ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
                         }}
                       >
-                        {v ? "Chaque année" : "Une fois"}
+                        {v ? "Chaque an" : "Une fois"}
                       </button>
                     ))}
                   </div>
@@ -872,7 +873,7 @@ export default function AdminPage() {
                                         whiteSpace: "nowrap",
                                       }}>
                                         <UsersThree size={11} weight="fill" />
-                                        n°{posInGroup + 1} dans la file
+                                        n°{posInGroup + 1}
                                       </span>
                                     )}
                                   </div>
@@ -1099,7 +1100,7 @@ export default function AdminPage() {
         }
         .admin-nav-btn:hover { color: var(--noir); }
         .admin-conges-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: stretch; }
-        .admin-conges-controls { display: flex; gap: 10px; align-items: stretch; }
+        .admin-conges-controls { display: flex; gap: 10px; align-items: stretch; flex-shrink: 0; }
         .swipe-delete-btn { display: none; }
         @media (max-width: 768px) {
           .swipe-delete-btn { display: flex; }
@@ -1110,9 +1111,10 @@ export default function AdminPage() {
           .admin-section-content { padding-left: 0 !important; }
           .admin-day-row { gap: 12px !important; }
           .admin-time-input { width: 90px !important; font-size: 12px !important; padding: 6px 4px 6px 8px !important; }
-          .admin-conges-row { flex-direction: column; }
-          .admin-conges-row input[type="date"] { width: 100%; box-sizing: border-box; }
-          .admin-conges-controls { justify-content: space-between; }
+          .admin-conges-row { flex-direction: column; gap: 8px; }
+          .admin-conges-row input[type="date"] { width: 100% !important; box-sizing: border-box; min-height: 44px; }
+          .admin-conges-controls { justify-content: space-between; width: 100%; }
+          .admin-conges-controls button[class*="admin-btn-primary"] { flex: 1; }
         }
       `}</style>
     </div>
