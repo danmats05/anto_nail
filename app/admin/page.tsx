@@ -136,11 +136,12 @@ export default function AdminPage() {
     localStorage.setItem("anto-manual",    JSON.stringify(manual));
 
     // Synchronise vers le serveur pour le calendrier côté clientes
-    await fetch("/api/schedule", {
+    const res = await fetch("/api/schedule", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ schedule, enabledHolidays: [...holidays], manual }),
-    }).catch(() => {});
+    });
+    if (!res.ok) console.error("Save schedule failed:", await res.text());
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);

@@ -52,8 +52,12 @@ export async function getScheduleConfig(): Promise<ScheduleConfig> {
 export async function saveScheduleConfig(config: ScheduleConfig): Promise<void> {
   const { error } = await supabase
     .from("settings")
-    .upsert({ key: "schedule", value: config });
-  if (error) console.error(error);
+    .update({ value: config })
+    .eq("key", "schedule");
+  if (error) {
+    console.error("saveScheduleConfig error:", error);
+    throw error;
+  }
 }
 
 export function getBlockedPatterns(config: ScheduleConfig): string[] {
