@@ -1,8 +1,9 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { createClient } from "@supabase/supabase-js";
 
-const DATA_DIR = join(process.cwd(), "data");
-const FILE     = join(DATA_DIR, "schedule.json");
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export type DaySchedule  = { enabled: boolean; open: string; close: string };
 export type ManualBlock  = { date: string; annual: boolean };
@@ -32,24 +33,29 @@ export const DEFAULT_SCHEDULE: Record<string, DaySchedule> = {
   dim: { enabled: false, open: "09:00", close: "18:00" },
 };
 
-function ensureDir() {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+const DEFAULT_CONFIG: ScheduleConfig = {
+  schedule: DEFAULT_SCHEDULE,
+  enabledHolidays: [],
+  manual: [],
+};
+
+export async function getScheduleConfig(): Promise<ScheduleConfig> {
+  const { data, error } = await supabase
+    .from("settings")
+    .select("value")
+    .eq("key", "schedule")
+    .single();
+  if (error || !data) return DEFAULT_CONFIG;
+  return data.value as ScheduleConfig;
 }
 
-export function getScheduleConfig(): ScheduleConfig {
-  ensureDir();
-  if (!existsSync(FILE)) return { schedule: DEFAULT_SCHEDULE, enabledHolidays: [], manual: [] };
-  try { return JSON.parse(readFileSync(FILE, "utf-8")); }
-  catch { return { schedule: DEFAULT_SCHEDULE, enabledHolidays: [], manual: [] }; }
+export async function saveScheduleConfig(config: ScheduleConfig): Promise<void> {
+  const { error } = await supabase
+    .from("settings")
+    .upsert({ key: "schedule", value: config });
+  if (error) console.error(error);
 }
 
-export function saveScheduleConfig(config: ScheduleConfig): void {
-  ensureDir();
-  writeFileSync(FILE, JSON.stringify(config, null, 2));
-}
-
-// Retourne les patterns bloqués pour le calendrier
-// MM-DD = annuel  |  YYYY-MM-DD = ponctuel
 export function getBlockedPatterns(config: ScheduleConfig): string[] {
   const patterns: string[] = [];
   for (const h of PRESET_HOLIDAYS) {

@@ -7,7 +7,7 @@ import {
 } from "../../lib/schedule";
 
 export async function GET() {
-  const config = getScheduleConfig();
+  const config = await getScheduleConfig();
   return NextResponse.json({
     schedule: config.schedule,
     blocked:  getBlockedPatterns(config),
@@ -16,6 +16,6 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const body: ScheduleConfig = await req.json();
-  saveScheduleConfig(body);
+  await saveScheduleConfig(body);
   return NextResponse.json({ ok: true });
 }
