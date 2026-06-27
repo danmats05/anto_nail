@@ -37,14 +37,25 @@ function FlipText({ text }: { text: string }) {
   );
 }
 
-export function Navbar() {
+export function Navbar({ ready = false }: { ready?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const btnWrapRef = useRef<HTMLDivElement>(null);
   const labelSpanRef = useRef<HTMLSpanElement>(null);
+  const labelWrapRef = useRef<HTMLDivElement>(null);
   const btnVisible = useRef(true);
   const labelIsDark = useRef(true);
   const darkEls = useRef<Element[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Slide du label depuis la droite après le preloader
+  useEffect(() => {
+    if (!ready) return;
+    gsap.fromTo(
+      labelSpanRef.current,
+      { x: "110%" },
+      { x: "0%", duration: 0.7, ease: "power3.out", delay: 1.2 }
+    );
+  }, [ready]);
 
   // Cache les éléments des sections sombres une fois montés
   useEffect(() => {
@@ -332,27 +343,32 @@ export function Navbar() {
           zIndex: 300,
           display: "flex",
           alignItems: "center",
+          opacity: 0,
         }}
       >
         {/* Label à gauche du bouton */}
-        <span
-          ref={labelSpanRef}
-          className="nav-menu-label"
-          style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "11px",
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "#FFFFFF",
-            paddingRight: "16px",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {isMenuOpen
-            ? "Cliquez pour cacher le menu"
-            : "Cliquez pour afficher le menu"}
-        </span>
+        <div ref={labelWrapRef} style={{ overflow: "hidden" }}>
+          <span
+            ref={labelSpanRef}
+            className="nav-menu-label"
+            style={{
+              display: "block",
+              fontFamily: "var(--font-dm-sans)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "#FFFFFF",
+              paddingRight: "16px",
+              whiteSpace: "nowrap",
+              transform: "translateX(110%)",
+            }}
+          >
+            {isMenuOpen
+              ? "Cliquez pour cacher le menu"
+              : "Cliquez pour afficher le menu"}
+          </span>
+        </div>
 
         {/* Bouton carré lavande — icône seulement */}
         <button

@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <>
       <Preloader onComplete={() => setReady(true)} />
-      <Navbar />
+      <Navbar ready={ready} />
       <main style={{ width: '100%' }}>
         <Hero ready={ready} />
         <ServicesIntro />

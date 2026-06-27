@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -76,6 +76,7 @@ const sectionLabel: React.CSSProperties = {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
+  const router                         = useRouter();
   const [authed, setAuthed]           = useState(false);
   const [pwd, setPwd]                 = useState("");
   const [pwdError, setPwdError]       = useState(false);
@@ -85,6 +86,9 @@ export default function AdminPage() {
   const [manual, setManual]           = useState<ManualBlock[]>([]);
   const [newDate, setNewDate]         = useState("");
   const [newAnnual, setNewAnnual]     = useState(false);
+  const [swipedId, setSwipedId]       = useState<string | null>(null);
+  const [deletingId, setDeletingId]   = useState<string | null>(null);
+  const touchStartX                   = useRef(0);
   const [saved, setSaved]             = useState(false);
 
   // ── Stats state ───────────────────────────────────────────────────────────
@@ -93,6 +97,7 @@ export default function AdminPage() {
   const [statMonth, setStatMonth]       = useState(now.getMonth() + 1);
   const [statYear, setStatYear]         = useState(now.getFullYear());
   const [chartRange, setChartRange] = useState<"annee" | "6mois" | "3mois" | "mois" | "semaine">("annee");
+  const [activePoint, setActivePoint] = useState<number | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -127,7 +132,8 @@ export default function AdminPage() {
 
   function logout() {
     sessionStorage.removeItem("anto-admin");
-    setAuthed(false);
+    sessionStorage.setItem("anto-skip-preloader", "1");
+    router.push("/");
   }
 
   async function save() {
@@ -202,6 +208,15 @@ export default function AdminPage() {
       body: JSON.stringify({ id }),
     });
     setAppointments(p => p.filter(a => a.id !== id));
+  }
+
+  function handleDelete(id: string) {
+    setDeletingId(id);
+    setSwipedId(null);
+    setTimeout(() => {
+      removeAppointment(id);
+      setDeletingId(null);
+    }, 480);
   }
 
   type ChartBar = { label: string; revenue: number; clients: number; isCurrent: boolean };
@@ -483,7 +498,7 @@ export default function AdminPage() {
                 Congés & imprévus
               </p>
 
-              <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap", alignItems: "stretch" }}>
+              <div className="admin-conges-row">
                 <input
                   type="date"
                   value={newDate}
@@ -500,42 +515,40 @@ export default function AdminPage() {
                     cursor:     "pointer",
                   }}
                 />
-                {/* Récurrence toggle */}
-                <div style={{
-                  display:    "flex",
-                  background: "rgba(0,0,0,0.04)",
-                  padding:    "3px",
-                }}>
-                  {([false, true] as const).map(v => (
-                    <button
-                      key={String(v)}
-                      onClick={() => setNewAnnual(v)}
-                      style={{
-                        fontFamily:    "var(--font-dm-sans)",
-                        fontSize:      "11px",
-                        fontWeight:    newAnnual === v ? 700 : 400,
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                        color:         newAnnual === v ? "var(--noir)" : "var(--grey)",
-                        background:    newAnnual === v ? "var(--white)" : "none",
-                        border:        "none",
-                        padding:       "6px 14px",
-                        cursor:        "pointer",
-                        transition:    "all 0.18s",
-                        boxShadow:     newAnnual === v ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-                      }}
-                    >
-                      {v ? "Chaque année" : "Une fois"}
-                    </button>
-                  ))}
+                {/* Récurrence toggle + bouton groupés */}
+                <div className="admin-conges-controls">
+                  <div style={{ display: "flex", background: "rgba(0,0,0,0.04)", padding: "3px" }}>
+                    {([false, true] as const).map(v => (
+                      <button
+                        key={String(v)}
+                        onClick={() => setNewAnnual(v)}
+                        style={{
+                          fontFamily:    "var(--font-dm-sans)",
+                          fontSize:      "11px",
+                          fontWeight:    newAnnual === v ? 700 : 400,
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          color:         newAnnual === v ? "var(--noir)" : "var(--grey)",
+                          background:    newAnnual === v ? "var(--white)" : "none",
+                          border:        "none",
+                          padding:       "6px 14px",
+                          cursor:        "pointer",
+                          transition:    "all 0.18s",
+                          boxShadow:     newAnnual === v ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                        }}
+                      >
+                        {v ? "Chaque année" : "Une fois"}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={addManual}
+                    className="admin-btn-primary"
+                    style={{ ...btnPrimary, padding: "0 24px", fontSize: "11px", alignSelf: "stretch" }}
+                  >
+                    Ajouter
+                  </button>
                 </div>
-                <button
-                  onClick={addManual}
-                  className="admin-btn-primary"
-                  style={{ ...btnPrimary, padding: "0 24px", fontSize: "11px", alignSelf: "stretch" }}
-                >
-                  Ajouter
-                </button>
               </div>
 
               {manual.length === 0 ? (
@@ -783,34 +796,72 @@ export default function AdminPage() {
                       </p>
                       {[...sectionAppts].sort((a, b) => b.date.localeCompare(a.date)).map((a, i) => {
                         const svc = SERVICES.find(s => s.key === a.service);
+                        const isSwiped = swipedId === a.id;
+                        const isDeleting = deletingId === a.id;
                         return (
                           <div key={a.id} style={{
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
-                            padding: "10px 0",
+                            position: "relative", overflow: "hidden",
+                            maxHeight: isDeleting ? "0px" : "120px",
+                            transition: isDeleting ? "max-height 0.28s ease 0.18s" : "none",
                             borderBottom: i < sectionAppts.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none",
                           }}>
-                            <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-                              <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)", width: "54px", flexShrink: 0 }}>
-                                {new Date(a.date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                              </span>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                                <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", fontWeight: 600, color: "var(--noir)" }}>
-                                  {a.nom ?? "—"}
-                                </span>
-                                <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)" }}>
-                                  {svc?.label ?? a.service}
-                                </span>
-                              </div>
+                            {/* Bouton suppression révélé au swipe (mobile) */}
+                            <div
+                              className="swipe-delete-btn"
+                              onClick={() => handleDelete(a.id)}
+                              style={{
+                                position: "absolute", right: 0, top: 0, bottom: 0, width: "72px",
+                                background: "#e74c3c", display: "flex", alignItems: "center",
+                                justifyContent: "center", cursor: "pointer",
+                              }}
+                            >
+                              <span style={{ color: "white", fontSize: "22px", lineHeight: 1 }}>×</span>
                             </div>
-                            <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-                              <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "12px", fontWeight: 600, color: "var(--lavender-dark)" }}>
-                                {fmtFCFA(a.price)}
-                              </span>
-                              <button onClick={() => removeAppointment(a.id)} className="admin-btn-remove" style={{
-                                fontFamily: "var(--font-dm-sans)", fontSize: "13px",
-                                color: "rgba(0,0,0,0.2)", background: "none", border: "none",
-                                cursor: "pointer", padding: "0 2px", lineHeight: 1, transition: "color 0.2s",
-                              }}>×</button>
+
+                            {/* Contenu de la ligne */}
+                            <div
+                              style={{
+                                display: "flex", alignItems: "center", justifyContent: "space-between",
+                                padding: "10px 0", background: "var(--white)",
+                                transform: isDeleting
+                                  ? "translateX(-110%)"
+                                  : isSwiped ? "translateX(-72px)" : "translateX(0)",
+                                transition: isDeleting
+                                  ? "transform 0.22s ease"
+                                  : "transform 0.25s ease",
+                              }}
+                              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                              onTouchEnd={(e) => {
+                                const dx = touchStartX.current - e.changedTouches[0].clientX;
+                                if (dx > 40) setSwipedId(a.id);
+                                else if (dx < -10) setSwipedId(null);
+                              }}
+                              onClick={() => { if (isSwiped) setSwipedId(null); }}
+                            >
+                              <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+                                <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)", width: "54px", flexShrink: 0 }}>
+                                  {new Date(a.date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                                </span>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                                  <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", fontWeight: 600, color: "var(--noir)" }}>
+                                    {a.nom ?? "—"}
+                                  </span>
+                                  <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)" }}>
+                                    {svc?.label ?? a.service}
+                                  </span>
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+                                <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "12px", fontWeight: 600, color: "var(--lavender-dark)" }}>
+                                  {fmtFCFA(a.price)}
+                                </span>
+                                {/* × visible uniquement sur desktop */}
+                                <button onClick={() => handleDelete(a.id)} className="admin-btn-remove admin-delete-desktop" style={{
+                                  fontFamily: "var(--font-dm-sans)", fontSize: "13px",
+                                  color: "rgba(0,0,0,0.2)", background: "none", border: "none",
+                                  cursor: "pointer", padding: "0 2px", lineHeight: 1, transition: "color 0.2s",
+                                }}>×</button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -864,7 +915,7 @@ export default function AdminPage() {
 
                 {/* Courbe SVG */}
                 {(() => {
-                  const VW = 800, VH = 130, PX = 16, PY = 20;
+                  const VW = 800, VH = 220, PX = 16, PY = 30;
                   const cW = VW - PX * 2;
                   const cH = VH - PY * 2;
                   const pts = bars.map((b, i) => ({
@@ -884,30 +935,65 @@ export default function AdminPage() {
                   const fillPath = linePath
                     ? linePath + ` L ${pts[pts.length-1].x},${PY+cH} L ${pts[0].x},${PY+cH} Z`
                     : "";
+                  const dotDelay = (i: number) => `${0.55 + i * (0.3 / Math.max(pts.length - 1, 1))}s`;
                   return (
-                    <svg viewBox={`0 0 ${VW} ${VH}`} style={{ width: "100%", height: "auto", display: "block", marginBottom: "10px" }}>
+                    <svg key={chartRange} viewBox={`0 0 ${VW} ${VH}`} style={{ width: "100%", height: "auto", display: "block", marginBottom: "10px", overflow: "visible" }}>
                       <defs>
                         <linearGradient id="lgFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%"   stopColor="#C9A8E0" stopOpacity="0.22" />
+                          <stop offset="0%"   stopColor="#C9A8E0" stopOpacity="0.28" />
                           <stop offset="100%" stopColor="#C9A8E0" stopOpacity="0.01" />
                         </linearGradient>
                       </defs>
                       {/* Grid */}
                       {[0.25, 0.5, 0.75].map(t => (
                         <line key={t} x1={PX} y1={PY + cH*(1-t)} x2={VW-PX} y2={PY + cH*(1-t)}
-                          stroke="rgba(0,0,0,0.05)" strokeWidth="1" />
+                          stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
                       ))}
-                      {/* Fill */}
-                      {fillPath && <path d={fillPath} fill="url(#lgFill)" />}
-                      {/* Curve */}
-                      {linePath && <path d={linePath} fill="none" stroke="#C9A8E0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
-                      {/* Dots */}
+                      {/* Fill — apparaît après la courbe */}
+                      {fillPath && (
+                        <path d={fillPath} fill="url(#lgFill)"
+                          style={{ opacity: 0, animation: "chartFadeIn 0.4s ease 0.6s forwards" }} />
+                      )}
+                      {/* Courbe — se trace de gauche à droite */}
+                      {linePath && (
+                        <path d={linePath} fill="none" stroke="#C9A8E0" strokeWidth="3"
+                          strokeLinecap="round" strokeLinejoin="round"
+                          pathLength="1" strokeDasharray="1" strokeDashoffset="1"
+                          style={{ animation: "drawCurve 0.7s cubic-bezier(0.4,0,0.2,1) forwards" }} />
+                      )}
+                      {/* Dots + zone de clic — en cascade après la courbe */}
                       {pts.map((p, i) => (
-                        <circle key={i} cx={p.x} cy={p.y}
-                          r={p.isCurrent ? 5 : 3.5}
-                          fill={p.isCurrent ? "#9B72C8" : "#C9A8E0"}
-                          stroke="white" strokeWidth="2" />
+                        <g key={i}
+                          style={{ cursor: "pointer", opacity: 0, animation: `chartFadeIn 0.25s ease ${dotDelay(i)} forwards` }}
+                          onMouseEnter={() => setActivePoint(i)}
+                          onMouseLeave={() => setActivePoint(null)}
+                          onPointerDown={(e) => { if (e.pointerType === "touch") setActivePoint(activePoint === i ? null : i); }}
+                        >
+                          <circle cx={p.x} cy={p.y} r={18} fill="transparent" />
+                          <circle cx={p.x} cy={p.y}
+                            r={activePoint === i ? 7 : (p.isCurrent ? 6 : 4.5)}
+                            fill={p.isCurrent ? "#9B72C8" : "#C9A8E0"}
+                            stroke="white" strokeWidth="2.5"
+                            style={{ transition: "r 0.15s" }}
+                          />
+                        </g>
                       ))}
+                      {/* Tooltip */}
+                      {activePoint !== null && (() => {
+                        const p = pts[activePoint];
+                        const tw = 110, th = 32;
+                        const tx = Math.min(Math.max(p.x - tw / 2, PX), VW - PX - tw);
+                        const ty = p.y - th - 14;
+                        return (
+                          <g style={{ pointerEvents: "none" }}>
+                            <rect x={tx} y={ty} width={tw} height={th} rx="6" fill="#1a1a1a" />
+                            <text x={tx + tw / 2} y={ty + th / 2 + 5} textAnchor="middle"
+                              fill="white" fontSize="13" fontFamily="DM Sans, sans-serif" fontWeight="600">
+                              {p.clients} client{p.clients > 1 ? "s" : ""}
+                            </text>
+                          </g>
+                        );
+                      })()}
                     </svg>
                   );
                 })()}
@@ -962,6 +1048,14 @@ export default function AdminPage() {
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes adminFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+        @keyframes drawCurve {
+          from { stroke-dashoffset: 1; }
+          to   { stroke-dashoffset: 0; }
+        }
+        @keyframes chartFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
         .admin-btn-primary { transition: background 0.25s ease, transform 0.2s ease !important; }
         .admin-btn-primary:hover { background: var(--lavender-dark) !important; transform: translateY(-2px); }
         .admin-btn-secondary { transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease !important; }
@@ -974,11 +1068,21 @@ export default function AdminPage() {
           transition: color 0.2s;
         }
         .admin-nav-btn:hover { color: var(--noir); }
+        .admin-conges-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: stretch; }
+        .admin-conges-controls { display: flex; gap: 10px; align-items: stretch; }
+        .swipe-delete-btn { display: none; }
+        @media (max-width: 768px) {
+          .swipe-delete-btn { display: flex; }
+          .admin-delete-desktop { display: none !important; }
+        }
         @media (max-width: 600px) {
           .admin-section { padding: 24px 20px !important; }
           .admin-section-content { padding-left: 0 !important; }
           .admin-day-row { gap: 12px !important; }
           .admin-time-input { width: 90px !important; font-size: 12px !important; padding: 6px 4px 6px 8px !important; }
+          .admin-conges-row { flex-direction: column; }
+          .admin-conges-row input[type="date"] { width: 100%; box-sizing: border-box; }
+          .admin-conges-controls { justify-content: space-between; }
         }
       `}</style>
     </div>

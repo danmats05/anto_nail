@@ -70,9 +70,10 @@ export function Hero({ ready = false }: { ready?: boolean }) {
       gsap.set(headlineRef.current, { y: 48 });
       gsap.set(bottomRef.current, { y: 28 });
 
+      const menuBtn = document.querySelector(".nav-btn-wrap");
       const tl = gsap.timeline({ delay: 0.15 });
 
-      tl.to(logoRef.current, {
+      tl.to([logoRef.current, menuBtn], {
         opacity: 1,
         duration: 0.8,
         ease: "power2.out",

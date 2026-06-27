@@ -85,10 +85,10 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
         style={{
           position: 'absolute',
           bottom: '40px',
-          right: '48px',
+          right: '80px',
           fontFamily: 'var(--font-dm-sans)',
           fontSize: 'clamp(80px, 12vw, 140px)',
-          fontWeight: 500,
+          fontWeight: 700,
           lineHeight: 1,
           color: '#555555',
           letterSpacing: '-0.03em',
