@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useLenis } from "lenis/react";
+import { CrownSimple } from "@phosphor-icons/react";
 
 function IconInstagram() {
   return (
@@ -31,13 +32,6 @@ function IconTikTok() {
   );
 }
 
-function IconCrown() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
-      <path d="M5 16h14l2-9-5 3-4-7-4 7-5-3 2 9zm0 2v2h14v-2H5z" />
-    </svg>
-  );
-}
 
 function IconSnapchat() {
   return (
@@ -406,7 +400,7 @@ export function Footer() {
                 transition: "color 0.25s ease",
               }}
             >
-              <IconCrown />
+              <CrownSimple size={14} weight="fill" />
             </a>
           </div>
         </div>

@@ -8,6 +8,7 @@ const supabase = createClient(
 export type StoredAppointment = {
   id:        string;
   date:      string;
+  time?:     string;
   service:   string;
   price:     number;
   nom:       string;

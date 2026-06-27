@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { addAppointment } from "../../lib/appointments";
+import { addAppointment, getAll } from "../../lib/appointments";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -34,10 +34,16 @@ export async function POST(req: NextRequest) {
   const apptDate    = date || new Date().toISOString().slice(0, 10);
   const submittedAt = new Date().toISOString();
 
+  // 0 — Vérifier les clientes déjà sur ce créneau (avant d'ajouter la nouvelle)
+  const sameSlot = date && time
+    ? (await getAll()).filter(a => a.date === date && a.time === time)
+    : [];
+
   // 1 — Sauvegarde pour les statistiques
   await addAppointment({
     id:        crypto.randomUUID(),
     date:      apptDate,
+    time:      time || undefined,
     service:   svc.key,
     price:     svc.price,
     nom,
@@ -67,10 +73,31 @@ export async function POST(req: NextRequest) {
       ? [{ filename: "inspiration.jpg", content: Buffer.from(image.split(",")[1], "base64") }]
       : [];
 
+    const conflictBlock = sameSlot.length > 0 ? `
+      <div style="margin-bottom:28px;background:#fff8e6;border:2px solid #f0c040;padding:18px 22px;">
+        <p style="font-size:10px;font-weight:700;color:#a07800;text-transform:uppercase;letter-spacing:0.16em;margin:0 0 10px">
+          ⚠️ Créneau partagé — à ne pas oublier
+        </p>
+        <p style="font-size:13px;color:#1a1a1a;margin:0 0 10px;line-height:1.6">
+          <strong>${nom}</strong> a choisi un créneau déjà pris.
+          ${sameSlot.length === 1
+            ? `<strong>${sameSlot[0].nom}</strong> passe en premier.`
+            : `Les clientes suivantes passent avant elle :`
+          }
+        </p>
+        ${sameSlot.length > 1 ? `
+        <ol style="margin:0 0 10px;padding-left:20px;color:#555;font-size:13px;line-height:1.9">
+          ${sameSlot.map(a => `<li><strong>${a.nom}</strong></li>`).join("")}
+        </ol>` : ""}
+        <p style="font-size:13px;color:#555;margin:0;line-height:1.6">
+          Elle attend votre message WhatsApp dès que vous êtes disponible pour l'accueillir.
+        </p>
+      </div>` : "";
+
     await resend.emails.send({
       from:        "Anto Nail <onboarding@resend.dev>",
       to:          ADMIN_EMAIL,
-      subject:     `✨ Nouvelle demande — ${prestation.split(",")[0]}${rdvFr ? " · " + rdvFr : ""}`,
+      subject:     `${sameSlot.length > 0 ? "⚠️ File d'attente" : "✨ Nouvelle demande"} — ${prestation.split(",")[0]}${rdvFr ? " · " + rdvFr : ""}`,
       attachments,
       html: `
         <!DOCTYPE html>
@@ -80,6 +107,8 @@ export async function POST(req: NextRequest) {
             <p style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#888888;margin:0 0 6px">Anto Nail</p>
             <h2 style="margin:0;font-size:22px;font-weight:700;letter-spacing:-0.02em">Nouvelle demande de RDV</h2>
           </div>
+
+          ${conflictBlock}
 
           <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
             <tr>

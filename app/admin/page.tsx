@@ -5,13 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { btnPrimary, btnSecondary } from "../lib/hooks";
+import { UsersThree, CrownSimple, Eye, EyeClosed } from "@phosphor-icons/react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type DaySchedule  = { enabled: boolean; open: string; close: string };
 type Schedule     = Record<string, DaySchedule>;
 type ManualBlock  = { id: string; date: string; annual: boolean };
-type Appointment  = { id: string; date: string; service: string; price: number; nom?: string };
+type Appointment  = { id: string; date: string; time?: string; service: string; price: number; nom?: string };
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -335,8 +336,6 @@ export default function AdminPage() {
             <Image src="/logo-anto.png" alt="Anto Nail" width={96} height={40}
               style={{ objectFit: "contain", display: "block" }} />
           </Link>
-          <span style={{ width: "1px", height: "24px", background: "rgba(0,0,0,0.1)" }} />
-          <p style={{ ...sectionLabel, gap: "0" }}>Mode Admin</p>
         </div>
 
         <button
@@ -794,10 +793,26 @@ export default function AdminPage() {
                         <span style={{ width: "16px", height: "1px", background: "var(--grey-light)" }} />
                         Historique des prestations
                       </p>
-                      {[...sectionAppts].sort((a, b) => b.date.localeCompare(a.date)).map((a, i) => {
+                      {(() => {
+                        // Groupes par créneau, dans l'ordre d'insertion (= ordre de réservation)
+                        const slotGroups = new Map<string, Appointment[]>();
+                        sectionAppts.forEach(a => {
+                          if (!a.time) return;
+                          const key = `${a.date}|${a.time}`;
+                          const group = slotGroups.get(key) ?? [];
+                          group.push(a);
+                          slotGroups.set(key, group);
+                        });
+                        const sorted = [...sectionAppts].sort((a, b) => b.date.localeCompare(a.date));
+                        return sorted.map((a, i) => {
                         const svc = SERVICES.find(s => s.key === a.service);
                         const isSwiped = swipedId === a.id;
                         const isDeleting = deletingId === a.id;
+                        const slotKey = a.time ? `${a.date}|${a.time}` : null;
+                        const group = slotKey ? (slotGroups.get(slotKey) ?? []) : [];
+                        const posInGroup = group.findIndex(ap => ap.id === a.id);
+                        const showBadge = posInGroup >= 1;
+                        const prevName = posInGroup >= 2 ? (group[posInGroup - 1].nom ?? "—") : null;
                         return (
                           <div key={a.id} style={{
                             position: "relative", overflow: "hidden",
@@ -841,11 +856,26 @@ export default function AdminPage() {
                               <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
                                 <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)", width: "54px", flexShrink: 0 }}>
                                   {new Date(a.date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                                  {a.time && <span style={{ display: "block", fontSize: "10px" }}>{a.time}</span>}
                                 </span>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                                  <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", fontWeight: 600, color: "var(--noir)" }}>
-                                    {a.nom ?? "—"}
-                                  </span>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                    <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", fontWeight: 600, color: "var(--noir)" }}>
+                                      {a.nom ?? "—"}
+                                    </span>
+                                    {showBadge && (
+                                      <span style={{
+                                        display: "inline-flex", alignItems: "center", gap: "4px",
+                                        background: "#fff3cd", color: "#a07800",
+                                        fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em",
+                                        padding: "2px 7px", textTransform: "uppercase",
+                                        whiteSpace: "nowrap",
+                                      }}>
+                                        <UsersThree size={11} weight="fill" />
+                                        n°{posInGroup + 1} dans la file
+                                      </span>
+                                    )}
+                                  </div>
                                   <span style={{ fontFamily: "var(--font-dm-sans)", fontSize: "11px", color: "var(--grey)" }}>
                                     {svc?.label ?? a.service}
                                   </span>
@@ -865,7 +895,7 @@ export default function AdminPage() {
                             </div>
                           </div>
                         );
-                      })}
+                      });})()}
                     </div>
                   </>
                 )}
@@ -1206,7 +1236,19 @@ function LoginScreen({ pwd, setPwd, error, onSubmit }: {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--cream)", position: "relative" }}>
+    <div style={{ minHeight: "100vh", background: "#f9fafb", position: "relative" }}>
+
+      {/* Grille qui s'estompe depuis le coin haut gauche */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 0,
+        backgroundImage: `
+          linear-gradient(to right, #d1d5db 1px, transparent 1px),
+          linear-gradient(to bottom, #d1d5db 1px, transparent 1px)
+        `,
+        backgroundSize: "32px 32px",
+        WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 0% 0%, #000 50%, transparent 90%)",
+        maskImage: "radial-gradient(ellipse 80% 80% at 0% 0%, #000 50%, transparent 90%)",
+      }} />
 
       <div style={{ position: "fixed", top: "24px", left: "clamp(20px, 5vw, 48px)", zIndex: 10 }}>
         <Link href="/" style={{ display: "block" }}>
@@ -1221,13 +1263,13 @@ function LoginScreen({ pwd, setPwd, error, onSubmit }: {
         justifyContent: "center",
         minHeight:      "100vh",
         padding:        "100px clamp(20px, 5vw, 48px) 60px",
+        position:       "relative",
+        zIndex:         1,
       }}>
         <div style={{ maxWidth: "440px", width: "100%" }}>
 
           <div style={{ marginBottom: "40px" }}>
-            <svg viewBox="0 0 24 24" fill="var(--lavender)" width="28" height="28" aria-hidden="true">
-              <path d="M5 16h14l2-9-5 3-4-7-4 7-5-3 2 9zm0 2v2h14v-2H5z" />
-            </svg>
+            <CrownSimple size={48} weight="fill" color="var(--lavender)" />
           </div>
 
           <p style={{
@@ -1242,7 +1284,6 @@ function LoginScreen({ pwd, setPwd, error, onSubmit }: {
             gap:           "12px",
             margin:        "0 0 20px",
           }}>
-            <span style={{ width: "28px", height: "1px", background: "var(--grey-light)", flexShrink: 0 }} />
             Espace administrateur
           </p>
 
@@ -1300,18 +1341,10 @@ function LoginScreen({ pwd, setPwd, error, onSubmit }: {
                     alignItems: "center",
                   }}
                 >
-                  {showPwd ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
+                  {showPwd
+                    ? <EyeClosed size={18} weight="light" />
+                    : <Eye size={18} weight="light" />
+                  }
                 </button>
               </div>
 

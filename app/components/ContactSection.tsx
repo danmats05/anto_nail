@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CalendarPicker } from "./CalendarPicker";
+import { WarningCircle, CalendarX, CheckFat } from "@phosphor-icons/react";
 
 const SERVICES = [
   "Pose Gel, dès39 000 FCFA",
@@ -13,6 +14,7 @@ const SERVICES = [
 ];
 
 type Status = "idle" | "loading" | "success" | "error";
+type ConflictInfo = { count: number; date: string; time: string };
 
 function PonctualiteBanner() {
   return (
@@ -170,10 +172,11 @@ export function ContactSection() {
     message: "",
   });
   const [booking, setBooking] = useState({ date: "", time: "" });
-  const [confirmed, setConfirmed] = useState<{ prestation: string; date: string; time: string } | null>(null);
+  const [confirmed, setConfirmed] = useState<{ prestation: string; date: string; time: string; withConflict?: boolean } | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [checkError, setCheckError] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
+  const [conflict, setConflict] = useState<ConflictInfo | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
 
@@ -208,13 +211,8 @@ export function ContactSection() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: { preventDefault(): void }) => {
-    e.preventDefault();
-    if (!accepted) {
-      setCheckError(true);
-      return;
-    }
-    setCheckError(false);
+  async function doSubmit(withConflict = false) {
+    setConflict(null);
     setStatus("loading");
     try {
       const res = await fetch("/api/contact", {
@@ -228,7 +226,7 @@ export function ContactSection() {
         }),
       });
       if (res.ok) {
-        setConfirmed({ prestation: form.prestation.split(",")[0], date: booking.date, time: booking.time });
+        setConfirmed({ prestation: form.prestation.split(",")[0], date: booking.date, time: booking.time, withConflict });
         setStatus("success");
         setForm({ nom: "", whatsapp: "", prestation: "", message: "" });
         setBooking({ date: "", time: "" });
@@ -241,6 +239,31 @@ export function ContactSection() {
     } catch {
       setStatus("error");
     }
+  }
+
+  const handleSubmit = async (e: { preventDefault(): void }) => {
+    e.preventDefault();
+    if (!accepted) {
+      setCheckError(true);
+      return;
+    }
+    setCheckError(false);
+
+    // Vérification de conflit si date + heure sélectionnées
+    if (booking.date && booking.time) {
+      try {
+        const res = await fetch(`/api/appointments?date=${booking.date}&time=${encodeURIComponent(booking.time)}`);
+        const { count } = await res.json();
+        if (count > 0) {
+          setConflict({ count, date: booking.date, time: booking.time });
+          return;
+        }
+      } catch {
+        // En cas d'erreur réseau, on laisse passer
+      }
+    }
+
+    await doSubmit();
   };
 
   return (
@@ -405,7 +428,9 @@ export function ContactSection() {
                 fontFamily: "var(--font-dm-sans)", fontSize: "13.5px",
                 lineHeight: 1.75, color: "var(--grey)", margin: "0 0 32px",
               }}>
-                Je vous recontacte sur WhatsApp dans les meilleurs délais pour confirmer votre créneau.
+                {confirmed?.withConflict
+                  ? "Je vous ferai signe sur WhatsApp dès que la séance précédente est terminée et que c'est votre tour."
+                  : "Je vous recontacte sur WhatsApp dans les meilleurs délais pour confirmer votre créneau."}
               </p>
 
               {/* CTA */}
@@ -907,6 +932,110 @@ export function ContactSection() {
         </div>
       </div>
 
+      {/* Modal conflit de créneau */}
+      {conflict && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9000,
+          background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "20px",
+          animation: "conflictIn 0.25s ease",
+        }}>
+          <div style={{
+            background: "var(--white)",
+            maxWidth: "480px", width: "100%",
+            padding: "40px",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+            animation: "conflictSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+          }}>
+            {/* Icône + titre */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "24px" }}>
+              <WarningCircle size={36} weight="duotone" color="var(--lavender-dark)" style={{ flexShrink: 0, marginTop: "2px" }} />
+              <div>
+                <p style={{
+                  fontFamily: "var(--font-dm-sans)", fontSize: "10px", fontWeight: 700,
+                  letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--lavender-dark)",
+                  margin: "0 0 6px",
+                }}>Créneau partagé</p>
+                <h3 style={{
+                  fontFamily: "var(--font-dm-sans)", fontSize: "22px", fontWeight: 700,
+                  letterSpacing: "-0.02em", color: "var(--noir)", margin: 0, lineHeight: 1.1,
+                }}>
+                  {conflict.count === 1
+                    ? "1 personne a déjà ce créneau"
+                    : `${conflict.count} personnes ont déjà ce créneau`}
+                </h3>
+              </div>
+            </div>
+
+            {/* Corps */}
+            <div style={{
+              background: "var(--cream)", padding: "20px 22px",
+              marginBottom: "28px",
+            }}>
+              <p style={{
+                fontFamily: "var(--font-dm-sans)", fontSize: "14px",
+                lineHeight: 1.75, color: "var(--grey)", margin: "0 0 10px",
+              }}>
+                Vous serez la{" "}
+                <strong style={{ color: "var(--noir)" }}>
+                  {conflict.count + 1}ème
+                </strong>{" "}
+                personne à réserver le{" "}
+                <strong style={{ color: "var(--noir)" }}>
+                  {new Date(conflict.date + "T12:00:00").toLocaleDateString("fr-FR", {
+                    weekday: "long", day: "numeric", month: "long",
+                  })} à {conflict.time}
+                </strong>.
+              </p>
+              <p style={{
+                fontFamily: "var(--font-dm-sans)", fontSize: "13px",
+                lineHeight: 1.7, color: "var(--grey)", margin: 0,
+              }}>
+                Votre heure de début sera décalée le temps que la séance précédente se termine.
+                Si vous confirmez, je vous ferai signe sur WhatsApp dès que je serai disponible pour vous accueillir.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <button
+                onClick={() => doSubmit(true)}
+                style={{
+                  fontFamily: "var(--font-dm-sans)", fontSize: "12px", fontWeight: 700,
+                  letterSpacing: "0.16em", textTransform: "uppercase",
+                  color: "var(--white)", background: "var(--noir)",
+                  border: "none", padding: "16px 24px", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--lavender-dark)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "var(--noir)")}
+              >
+                <CheckFat size={16} weight="fill" />
+                Confirmer mon rendez-vous
+              </button>
+              <button
+                onClick={() => setConflict(null)}
+                style={{
+                  fontFamily: "var(--font-dm-sans)", fontSize: "12px", fontWeight: 600,
+                  letterSpacing: "0.12em", textTransform: "uppercase",
+                  color: "var(--grey)", background: "none",
+                  border: "1px solid rgba(0,0,0,0.15)", padding: "14px 24px", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                  transition: "color 0.2s, border-color 0.2s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = "var(--noir)"; e.currentTarget.style.borderColor = "var(--noir)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--grey)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)"; }}
+              >
+                <CalendarX size={16} />
+                Choisir un autre créneau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .contact-input:focus { border-color: var(--lavender-dark) !important; }
         .contact-input::placeholder { color: var(--grey-light); }
@@ -915,6 +1044,11 @@ export function ContactSection() {
         .img-preview-wrap:hover .img-remove-btn { opacity: 1; }
         @media (max-width: 1023px) { .img-remove-btn { opacity: 1 !important; } }
         .contact-submit:hover { background: var(--lavender-dark) !important; }
+        @keyframes conflictIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes conflictSlideUp {
+          from { opacity: 0; transform: translateY(24px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
         @media (max-width: 900px) {
           .contact-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
         }
