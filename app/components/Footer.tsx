@@ -31,6 +31,14 @@ function IconTikTok() {
   );
 }
 
+function IconCrown() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+      <path d="M5 16h14l2-9-5 3-4-7-4 7-5-3 2 9zm0 2v2h14v-2H5z" />
+    </svg>
+  );
+}
+
 function IconSnapchat() {
   return (
     <svg
@@ -316,40 +324,19 @@ export function Footer() {
       {/* Legal bar */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div
+          className="footer-bottom"
           style={{
             maxWidth: "1400px",
             margin: "0 auto",
             padding: "20px clamp(20px, 5vw, 48px)",
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
+            justifyContent: "space-between",
             gap: "12px",
+            flexWrap: "wrap",
           }}
         >
-          <div style={{ display: "flex", gap: "28px", flexWrap: "wrap" }}>
-            {[
-              { label: "Mentions légales", href: "/mentions-legales" },
-              {
-                label: "Politique de confidentialité",
-                href: "/politique-de-confidentialite",
-              },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="footer-link"
-                style={{
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "12px",
-                  fontWeight: 400,
-                  color: "rgba(0,0,0,0.35)",
-                  textDecoration: "none",
-                }}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
+          {/* Copyright */}
           <span
             style={{
               fontFamily: "var(--font-dm-sans)",
@@ -381,6 +368,47 @@ export function Footer() {
               />
             </a>
           </span>
+
+          {/* Legal links + crown */}
+          <div className="footer-bottom-links" style={{ display: "flex", alignItems: "center", gap: "28px", flexWrap: "wrap" }}>
+            {[
+              { label: "Mentions légales", href: "/mentions-legales" },
+              {
+                label: "Politique de confidentialité",
+                href: "/politique-de-confidentialite",
+              },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="footer-link"
+                style={{
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "12px",
+                  fontWeight: 400,
+                  color: "rgba(0,0,0,0.35)",
+                  textDecoration: "none",
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+
+            <a
+              href="/admin"
+              aria-label="Administration"
+              className="footer-crown"
+              style={{
+                color: "rgba(0,0,0,0.18)",
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                transition: "color 0.25s ease",
+              }}
+            >
+              <IconCrown />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -390,6 +418,7 @@ export function Footer() {
         .footer-logo { transition: opacity 0.25s ease; }
         .footer-logo:hover { opacity: 0.75; }
         .footer-dj-link:hover { opacity: 1 !important; }
+        .footer-crown:hover { color: rgba(0,0,0,0.45) !important; }
         .social-icon { transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease; }
         .social-icon:hover { border-color: var(--lavender) !important; color: var(--lavender-dark) !important; background: rgba(255,255,255,0.8) !important; }
         @media (max-width: 960px) {
@@ -397,6 +426,10 @@ export function Footer() {
         }
         @media (max-width: 560px) {
           .footer-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 600px) {
+          .footer-bottom { flex-direction: column-reverse; align-items: center !important; text-align: center; }
+          .footer-bottom-links { justify-content: center; gap: 20px !important; }
         }
       `}</style>
     </footer>

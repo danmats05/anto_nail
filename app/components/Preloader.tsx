@@ -10,6 +10,17 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const lenis = useLenis()
 
   useEffect(() => {
+    // Skip preloader si on vient de la page admin
+    const skip = sessionStorage.getItem('anto-skip-preloader')
+    if (skip) {
+      sessionStorage.removeItem('anto-skip-preloader')
+      if (lenis) lenis.start()
+      document.body.style.overflow = ''
+      if (overlayRef.current) overlayRef.current.style.display = 'none'
+      onComplete?.()
+      return
+    }
+
     // Lock scroll during loading
     if (lenis) lenis.stop()
     document.body.style.overflow = 'hidden'

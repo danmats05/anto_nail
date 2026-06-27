@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarPicker } from "./CalendarPicker";
 
 const SERVICES = [
   "Pose Gel, dès39 000 FCFA",
@@ -168,10 +169,36 @@ export function ContactSection() {
     prestation: "",
     message: "",
   });
+  const [booking, setBooking] = useState({ date: "", time: "" });
+  const [confirmed, setConfirmed] = useState<{ prestation: string; date: string; time: string } | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [checkError, setCheckError] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+
+  function resizeAndEncode(file: File): Promise<string> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1200;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas
+            .getContext("2d")!
+            .drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -190,17 +217,23 @@ export function ContactSection() {
     setCheckError(false);
     setStatus("loading");
     try {
-      const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(form),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          date: booking.date,
+          time: booking.time,
+          image: imageBase64,
+        }),
       });
       if (res.ok) {
+        setConfirmed({ prestation: form.prestation.split(",")[0], date: booking.date, time: booking.time });
         setStatus("success");
         setForm({ nom: "", whatsapp: "", prestation: "", message: "" });
+        setBooking({ date: "", time: "" });
+        setImagePreview(null);
+        setImageBase64(null);
         setAccepted(false);
       } else {
         setStatus("error");
@@ -286,8 +319,8 @@ export function ContactSection() {
               maxWidth: "340px",
             }}
           >
-            Remplissez le formulaire et je vous recontacte sur WhatsApp
-            pour confirmer votre créneau.
+            Remplissez le formulaire et je vous recontacte sur WhatsApp pour
+            confirmer votre créneau.
           </p>
 
           <div
@@ -324,60 +357,77 @@ export function ContactSection() {
         {/* Right — form */}
         <div>
           {status === "success" ? (
-            <div
-              style={{
-                padding: "48px",
-                background: "var(--cream)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: "16px",
-              }}
-            >
-              <span style={{ fontSize: "32px" }}>✓</span>
-              <h3
-                style={{
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  color: "var(--noir)",
-                  margin: 0,
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Demande envoyée !
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "14px",
-                  lineHeight: 1.7,
-                  color: "var(--grey)",
-                  margin: 0,
-                }}
-              >
-                Je vous recontacte sur WhatsApp pour confirmer votre
-                rendez-vous.
+            <div style={{
+              background: "var(--cream)",
+              borderLeft: "3px solid var(--lavender)",
+              padding: "44px 40px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 0,
+              animation: "fadeConfirm 0.4s ease both",
+            }}>
+              {/* Label */}
+              <p style={{
+                fontFamily: "var(--font-dm-sans)", fontSize: "10px", fontWeight: 700,
+                letterSpacing: "0.26em", textTransform: "uppercase", color: "var(--grey)",
+                display: "flex", alignItems: "center", gap: "12px", margin: "0 0 28px",
+              }}>
+                <span style={{ width: "20px", height: "1px", background: "var(--grey-light)", flexShrink: 0 }} />
+                Confirmation
               </p>
+
+              {/* Headline */}
+              <h3 style={{
+                fontFamily: "var(--font-dm-sans)", fontSize: "clamp(32px, 4vw, 44px)",
+                fontWeight: 700, letterSpacing: "-0.035em", lineHeight: 1.0,
+                color: "var(--noir)", margin: "0 0 28px",
+              }}>
+                Demande<br />bien reçue.
+              </h3>
+
+              {/* Récap créneau si choisi */}
+              {confirmed?.date && (
+                <div style={{ marginBottom: "24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <p style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", color: "var(--noir)", fontWeight: 600, margin: 0 }}>
+                    {new Date(confirmed.date + "T12:00:00").toLocaleDateString("fr-FR", {
+                      weekday: "long", day: "numeric", month: "long",
+                    })}
+                    {confirmed.time ? ` à ${confirmed.time}` : ""}
+                  </p>
+                  <p style={{ fontFamily: "var(--font-dm-sans)", fontSize: "13px", color: "var(--grey)", margin: 0 }}>
+                    {confirmed.prestation}
+                  </p>
+                </div>
+              )}
+
+              {/* Message */}
+              <p style={{
+                fontFamily: "var(--font-dm-sans)", fontSize: "13.5px",
+                lineHeight: 1.75, color: "var(--grey)", margin: "0 0 32px",
+              }}>
+                Je vous recontacte sur WhatsApp dans les meilleurs délais pour confirmer votre créneau.
+              </p>
+
+              {/* CTA */}
               <button
-                onClick={() => setStatus("idle")}
+                onClick={() => { setStatus("idle"); setConfirmed(null); }}
                 style={{
-                  marginTop: "8px",
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "var(--noir)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "0",
-                  textDecoration: "underline",
+                  alignSelf: "flex-start",
+                  fontFamily: "var(--font-dm-sans)", fontSize: "11px", fontWeight: 700,
+                  letterSpacing: "0.16em", textTransform: "uppercase",
+                  color: "var(--noir)", background: "none", border: "none",
+                  cursor: "pointer", padding: 0,
+                  borderBottom: "1px solid var(--noir)",
+                  paddingBottom: "2px",
+                  transition: "opacity 0.2s",
                 }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.5")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
               >
-                Nouvelle demande
+                Faire une nouvelle demande →
               </button>
+
+              <style>{`.fadeConfirm { } @keyframes fadeConfirm { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }`}</style>
             </div>
           ) : (
             <form
@@ -527,6 +577,27 @@ export function ContactSection() {
                 </select>
               </div>
 
+              {/* Calendrier */}
+              <CalendarPicker
+                value={booking}
+                onChange={(date, time) => setBooking({ date, time })}
+              />
+              <p
+                style={{
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "12px",
+                  color: "var(--grey)",
+                  lineHeight: 1.7,
+                  margin: 0,
+                }}
+              >
+                Les jours grisés correspondent à mes indisponibilités et les
+                horaires affichés correspondent à mes créneaux disponibles. Si
+                aucun créneau ne vous convient, précisez vos disponibilités dans
+                le champ ci-dessous et je ferai de mon mieux pour
+                m&apos;adapter.
+              </p>
+
               {/* Message */}
               <div
                 style={{ display: "flex", flexDirection: "column", gap: "8px" }}
@@ -579,106 +650,154 @@ export function ContactSection() {
 
               {/* Import image inspiration */}
               <div>
-                <p style={{
-                  fontFamily: 'var(--font-dm-sans)',
-                  fontSize: '12px',
-                  fontWeight: 400,
-                  color: 'var(--grey)',
-                  margin: '0 0 10px',
-                  lineHeight: 1.6,
-                }}>
-                  Vous avez un modèle en tête ? Importez une image de référence <span style={{ color: 'var(--grey-light)' }}>(optionnel)</span>
+                <p
+                  style={{
+                    fontFamily: "var(--font-dm-sans)",
+                    fontSize: "12px",
+                    fontWeight: 400,
+                    color: "var(--grey)",
+                    margin: "0 0 10px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  Vous avez un modèle en tête ? Importez une image de référence{" "}
+                  <span style={{ color: "var(--grey-light)" }}>
+                    (optionnel)
+                  </span>
                 </p>
                 <input
                   type="file"
                   id="inspiration"
                   name="inspiration"
                   accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
+                  style={{ display: "none" }}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
                     if (file) {
-                      setImagePreview(URL.createObjectURL(file))
+                      const b64 = await resizeAndEncode(file);
+                      setImageBase64(b64);
+                      setImagePreview(b64);
                     }
                   }}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label
-                  htmlFor="inspiration"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-dm-sans)',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: 'var(--noir)',
-                    border: '1px solid rgba(0,0,0,0.15)',
-                    padding: '10px 16px',
-                    background: 'var(--cream)',
-                    transition: 'border-color 0.2s ease, background 0.2s ease',
-                    flexShrink: 0,
-                  }}
-                  className="upload-btn"
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
-                  <span id="inspiration-label">Importer une image</span>
-                </label>
-
-                {imagePreview && (
-                  <>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d7a3a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
+                  <label
+                    htmlFor="inspiration"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontFamily: "var(--font-dm-sans)",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      color: "var(--noir)",
+                      border: "1px solid rgba(0,0,0,0.15)",
+                      padding: "10px 16px",
+                      background: "var(--cream)",
+                      transition:
+                        "border-color 0.2s ease, background 0.2s ease",
+                      flexShrink: 0,
+                    }}
+                    className="upload-btn"
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <div className="img-preview-wrap" style={{ position: 'relative', height: '39px', width: '39px', flexShrink: 0 }}>
-                      <img
-                        src={imagePreview}
-                        alt="Aperçu"
-                        style={{
-                          height: '39px',
-                          width: '39px',
-                          objectFit: 'cover',
-                          border: '1px solid rgba(0,0,0,0.10)',
-                          display: 'block',
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="img-remove-btn"
-                        onClick={() => {
-                          setImagePreview(null)
-                          const input = document.getElementById('inspiration') as HTMLInputElement
-                          if (input) input.value = ''
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: '-6px',
-                          right: '-6px',
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          background: 'var(--noir)',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: 0,
-                        }}
-                        aria-label="Supprimer l'image"
+                    <span id="inspiration-label">Importer une image</span>
+                  </label>
+
+                  {imagePreview && (
+                    <>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#2d7a3a"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-                          <line x1="2" y1="2" x2="8" y2="8"/><line x1="8" y1="2" x2="2" y2="8"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </>
-                )}
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <div
+                        className="img-preview-wrap"
+                        style={{
+                          position: "relative",
+                          height: "39px",
+                          width: "39px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <img
+                          src={imagePreview}
+                          alt="Aperçu"
+                          style={{
+                            height: "39px",
+                            width: "39px",
+                            objectFit: "cover",
+                            border: "1px solid rgba(0,0,0,0.10)",
+                            display: "block",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="img-remove-btn"
+                          onClick={() => {
+                            setImagePreview(null);
+                            setImageBase64(null);
+                            const input = document.getElementById(
+                              "inspiration",
+                            ) as HTMLInputElement;
+                            if (input) input.value = "";
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: "-6px",
+                            right: "-6px",
+                            width: "16px",
+                            height: "16px",
+                            borderRadius: "50%",
+                            background: "var(--noir)",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 0,
+                          }}
+                          aria-label="Supprimer l'image"
+                        >
+                          <svg
+                            width="8"
+                            height="8"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          >
+                            <line x1="2" y1="2" x2="8" y2="8" />
+                            <line x1="8" y1="2" x2="2" y2="8" />
+                          </svg>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

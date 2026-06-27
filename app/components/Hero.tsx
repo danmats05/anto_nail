@@ -136,6 +136,7 @@ export function Hero({ ready = false }: { ready?: boolean }) {
       </div>
 
       <section
+        id="hero"
         ref={sectionRef}
         className="hero-section"
         style={{

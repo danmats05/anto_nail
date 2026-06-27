@@ -33,3 +33,6 @@ yarn-error.log*
 
 # Vercel
 .vercel
+
+# Data local (remplacé par Supabase en production)
+data/*.json
