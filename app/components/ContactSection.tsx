@@ -894,7 +894,7 @@ export function ContactSection() {
                 onMouseLeave={e => (e.currentTarget.style.background = "var(--noir)")}
               >
                 <CheckFat size={16} weight="fill" />
-                Confirmer mon rendez-vous
+                Confirmer mon RDV
               </button>
               <button
                 onClick={() => setConflict(null)}

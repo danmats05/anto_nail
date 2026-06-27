@@ -1099,22 +1099,21 @@ export default function AdminPage() {
           transition: color 0.2s;
         }
         .admin-nav-btn:hover { color: var(--noir); }
-        .admin-conges-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: stretch; }
-        .admin-conges-controls { display: flex; gap: 10px; align-items: stretch; flex-shrink: 0; }
+        .admin-conges-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: stretch; width: 100%; box-sizing: border-box; }
+        .admin-conges-controls { display: flex; gap: 10px; align-items: stretch; }
         .swipe-delete-btn { display: none; }
         @media (max-width: 768px) {
           .swipe-delete-btn { display: flex; }
           .admin-delete-desktop { display: none !important; }
         }
         @media (max-width: 600px) {
-          .admin-section { padding: 24px 20px !important; }
+          .admin-section { padding: 24px 20px !important; overflow: hidden; }
           .admin-section-content { padding-left: 0 !important; }
           .admin-day-row { gap: 12px !important; }
           .admin-time-input { width: 90px !important; font-size: 12px !important; padding: 6px 4px 6px 8px !important; }
           .admin-conges-row { flex-direction: column; gap: 8px; }
-          .admin-conges-row input[type="date"] { width: 100% !important; box-sizing: border-box; min-height: 44px; }
-          .admin-conges-controls { justify-content: space-between; width: 100%; }
-          .admin-conges-controls button[class*="admin-btn-primary"] { flex: 1; }
+          .admin-conges-row input[type="date"] { width: 100% !important; box-sizing: border-box; min-height: 44px; display: block; }
+          .admin-conges-controls { justify-content: space-between; width: 100%; box-sizing: border-box; }
         }
       `}</style>
     </div>
