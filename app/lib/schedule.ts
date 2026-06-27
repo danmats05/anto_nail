@@ -1,10 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export type DaySchedule  = { enabled: boolean; open: string; close: string };
 export type ManualBlock  = { date: string; annual: boolean };
 
@@ -39,22 +32,49 @@ const DEFAULT_CONFIG: ScheduleConfig = {
   manual: [],
 };
 
+function headers() {
+  return {
+    "apikey":        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+    "Content-Type":  "application/json",
+  };
+}
+
+function base() {
+  return `${process.env.SUPABASE_URL}/rest/v1/settings`;
+}
+
 export async function getScheduleConfig(): Promise<ScheduleConfig> {
-  const { data, error } = await supabase
-    .from("settings")
-    .select("value")
-    .eq("key", "schedule")
-    .single();
-  if (error || !data) return DEFAULT_CONFIG;
-  return data.value as ScheduleConfig;
+  try {
+    const res = await fetch(`${base()}?key=eq.schedule&select=value`, {
+      headers: headers(),
+      cache: "no-store",
+    });
+    if (!res.ok) return DEFAULT_CONFIG;
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return DEFAULT_CONFIG;
+    return rows[0].value as ScheduleConfig;
+  } catch {
+    return DEFAULT_CONFIG;
+  }
 }
 
 export async function saveScheduleConfig(config: ScheduleConfig): Promise<void> {
-  await supabase.from("settings").delete().eq("key", "schedule");
-  const { error } = await supabase.from("settings").insert({ key: "schedule", value: config });
-  if (error) {
-    console.error("saveScheduleConfig error:", error);
-    throw error;
+  // Supprime l'ancienne ligne
+  await fetch(`${base()}?key=eq.schedule`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+  // Insère la nouvelle
+  const res = await fetch(base(), {
+    method: "POST",
+    headers: { ...headers(), "Prefer": "return=minimal" },
+    body: JSON.stringify({ key: "schedule", value: config }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("saveScheduleConfig:", err);
+    throw new Error(err);
   }
 }
 
